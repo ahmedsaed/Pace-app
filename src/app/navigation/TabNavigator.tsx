@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RecordsScreen from '../screens/RecordsScreen';
 import AccountsStackNavigator from './AccountsStackNavigator';
-import { darkColors } from '../../utils/colors';
+import { useColors } from '../../hooks/useColors';
 import { spacing, fontSize, borderRadius } from '../../styles/theme';
 
 export type TabParamList = {
@@ -16,19 +16,22 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   
   return (
     <Tab.Navigator
-      sceneContainerStyle={{ backgroundColor: darkColors.background }}
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.background },
         tabBarStyle: {
           ...styles.tabBar,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
         },
-        tabBarActiveTintColor: darkColors.primary,
-        tabBarInactiveTintColor: darkColors.textSecondary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarIconStyle: styles.tabBarIcon,
       }}
@@ -39,7 +42,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Records',
           tabBarIcon: ({ focused, color }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+            <View style={[styles.iconContainer, focused && { ...styles.iconContainerActive, backgroundColor: colors.primaryTransparent || 'rgba(59, 130, 246, 0.15)' }]}>
               <Text style={[styles.iconText, { color }]}>📝</Text>
             </View>
           ),
@@ -51,7 +54,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Accounts',
           tabBarIcon: ({ focused, color }) => (
-            <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+            <View style={[styles.iconContainer, focused && { ...styles.iconContainerActive, backgroundColor: colors.primaryTransparent || 'rgba(59, 130, 246, 0.15)' }]}>
               <Text style={[styles.iconText, { color }]}>💳</Text>
             </View>
           ),
@@ -63,9 +66,7 @@ const TabNavigator = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: darkColors.surface,
     borderTopWidth: 1,
-    borderTopColor: darkColors.border,
     paddingTop: spacing.sm,
   },
   tabBarLabel: {
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconContainerActive: {
-    backgroundColor: darkColors.primaryTransparent || 'rgba(59, 130, 246, 0.15)',
+    // Background color set inline with dynamic colors
   },
   iconText: {
     fontSize: 24,

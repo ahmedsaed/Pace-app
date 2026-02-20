@@ -1,10 +1,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import AccountsScreen from '../screens/AccountsScreen';
 import AddAccountScreen from '../screens/AddAccountScreen';
 import EditAccountScreen from '../screens/EditAccountScreen';
 import { Account } from '../../utils/types';
-import { darkColors } from '../../utils/colors';
+import { useColors } from '../../hooks/useColors';
 
 export type AccountsStackParamList = {
   AccountsList: undefined;
@@ -15,20 +16,23 @@ export type AccountsStackParamList = {
 const Stack = createNativeStackNavigator<AccountsStackParamList>();
 
 const AccountsStackNavigator = () => {
+  const colors = useColors();
+  
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: darkColors.background,
+          backgroundColor: colors.background,
         },
-        headerTintColor: darkColors.text,
+        headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: '600',
         },
         headerShadowVisible: false,
         contentStyle: {
-          backgroundColor: darkColors.background,
+          backgroundColor: colors.background,
         },
+        animation: 'fade',
       }}
     >
       <Stack.Screen

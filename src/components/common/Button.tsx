@@ -31,19 +31,19 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const buttonStyle = [
     styles.button,
-    styles[`button${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles],
-    styles[`button${size.charAt(0).toUpperCase() + size.slice(1)}` as keyof typeof styles],
+    styles[`button${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles] as ViewStyle,
+    styles[`button${size.charAt(0).toUpperCase() + size.slice(1)}` as keyof typeof styles] as ViewStyle,
     disabled && styles.buttonDisabled,
     style,
-  ];
+  ].filter(Boolean);
 
   const textStyleCombined = [
     styles.text,
-    styles[`text${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles],
-    styles[`text${size.charAt(0).toUpperCase() + size.slice(1)}` as keyof typeof styles],
+    styles[`text${variant.charAt(0).toUpperCase() + variant.slice(1)}` as keyof typeof styles] as TextStyle,
+    styles[`text${size.charAt(0).toUpperCase() + size.slice(1)}` as keyof typeof styles] as TextStyle,
     disabled && styles.textDisabled,
     textStyle,
-  ];
+  ].filter(Boolean);
 
   return (
     <TouchableOpacity

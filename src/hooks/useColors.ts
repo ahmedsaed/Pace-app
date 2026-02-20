@@ -4,7 +4,7 @@
  */
 
 import { useThemeStore } from '../store/themeStore';
-import { darkColors, lightColors } from './colors';
+import { darkColors, lightColors } from '../utils/colors';
 
 export const useColors = () => {
   const mode = useThemeStore((state) => state.mode);

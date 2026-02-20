@@ -8,7 +8,8 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { darkColors } from '../../utils/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useColors } from '../../hooks/useColors';
 import { spacing, fontSize, fontWeight, borderRadius, shadows } from '../../styles/theme';
 import { formatCurrency, formatDate } from '../../utils/formatting';
 import { useThemeStore } from '../../store/themeStore';
@@ -16,10 +17,14 @@ import { useThemeStore } from '../../store/themeStore';
 const DemoHomeScreen = () => {
   const currentDate = new Date();
   const { mode, toggleTheme } = useThemeStore();
+  const colors = useColors();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={darkColors.background} />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <StatusBar 
+        barStyle={mode === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={colors.background} 
+      />
       
       <ScrollView 
         style={styles.scrollView}
@@ -29,180 +34,104 @@ const DemoHomeScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Hello, Ahmed! 👋</Text>
-            <Text style={styles.date}>{formatDate(currentDate, 'EEEE, MMMM dd')}</Text>
+            <Text style={[styles.greeting, { color: colors.text }]}>Hello, Ahmed! 👋</Text>
+            <Text style={[styles.date, { color: colors.textSecondary }]}>{formatDate(currentDate, 'EEEE, MMMM dd')}</Text>
           </View>
-          <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-            <Text style={styles.themeToggleText}>{mode === 'dark' ? '🌙' : '☀️'}</Text>
+          <TouchableOpacity onPress={toggleTheme} style={[styles.themeToggle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons 
+              name={mode === 'dark' ? 'moon' : 'sunny'} 
+              size={22} 
+              color={colors.text} 
+            />
           </TouchableOpacity>
         </View>
 
         {/* Balance Card */}
-        <View style={[styles.card, styles.balanceCard]}>
-          <Text style={styles.balanceLabel}>Total Balance</Text>
-          <Text style={styles.balanceAmount}>{formatCurrency(12547.89, 'USD')}</Text>
+        <View style={[styles.card, styles.balanceCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Total Balance</Text>
+          <Text style={[styles.balanceAmount, { color: colors.text }]}>{formatCurrency(12547.89, 'USD')}</Text>
           <View style={styles.balanceStats}>
             <View style={styles.balanceStatItem}>
-              <Text style={styles.balanceStatLabel}>Income</Text>
-              <Text style={[styles.balanceStatValue, { color: darkColors.income }]}>
+              <Text style={[styles.balanceStatLabel, { color: colors.textSecondary }]}>Income</Text>
+              <Text style={[styles.balanceStatValue, { color: '#10B981' }]}>
                 {formatCurrency(8500, 'USD')}
               </Text>
             </View>
-            <View style={styles.balanceStatDivider} />
+            <View style={[styles.balanceStatDivider, { backgroundColor: colors.border }]} />
             <View style={styles.balanceStatItem}>
-              <Text style={styles.balanceStatLabel}>Expenses</Text>
-              <Text style={[styles.balanceStatValue, { color: darkColors.expense }]}>
+              <Text style={[styles.balanceStatLabel, { color: colors.textSecondary }]}>Expenses</Text>
+              <Text style={[styles.balanceStatValue, { color: '#EF4444' }]}>
                 {formatCurrency(3247.50, 'USD')}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActions}>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: darkColors.income }]}>
-              <Text style={styles.actionEmoji}>💰</Text>
-              <Text style={styles.actionLabel}>Income</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: darkColors.expense }]}>
-              <Text style={styles.actionEmoji}>💸</Text>
-              <Text style={styles.actionLabel}>Expense</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionButton, { backgroundColor: darkColors.transfer }]}>
-              <Text style={styles.actionEmoji}>🔄</Text>
-              <Text style={styles.actionLabel}>Transfer</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Recent Transactions */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Transactions</Text>
             <TouchableOpacity>
-              <Text style={styles.seeAll}>See All</Text>
+              <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
 
           {/* Transaction Items */}
           <View style={styles.transactionList}>
             {/* Income Transaction */}
-            <View style={styles.transactionItem}>
-              <View style={[styles.transactionIcon, { backgroundColor: darkColors.incomeLight }]}>
-                <Text style={styles.transactionEmoji}>💼</Text>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
+                <Ionicons name="briefcase" size={20} color="#10B981" />
               </View>
               <View style={styles.transactionInfo}>
-                <Text style={styles.transactionTitle}>Salary</Text>
-                <Text style={styles.transactionDate}>Today, 9:00 AM</Text>
+                <Text style={[styles.transactionTitle, { color: colors.text }]}>Salary</Text>
+                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Today, 9:00 AM</Text>
               </View>
-              <Text style={[styles.transactionAmount, { color: darkColors.income }]}>
+              <Text style={[styles.transactionAmount, { color: '#10B981' }]}>
                 +{formatCurrency(5000, 'USD')}
               </Text>
             </View>
 
             {/* Expense Transaction */}
-            <View style={styles.transactionItem}>
-              <View style={[styles.transactionIcon, { backgroundColor: darkColors.expenseLight }]}>
-                <Text style={styles.transactionEmoji}>🍔</Text>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
+                <Ionicons name="restaurant" size={20} color="#EF4444" />
               </View>
               <View style={styles.transactionInfo}>
-                <Text style={styles.transactionTitle}>Restaurant</Text>
-                <Text style={styles.transactionDate}>Yesterday, 7:30 PM</Text>
+                <Text style={[styles.transactionTitle, { color: colors.text }]}>Restaurant</Text>
+                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Yesterday, 7:30 PM</Text>
               </View>
-              <Text style={[styles.transactionAmount, { color: darkColors.expense }]}>
+              <Text style={[styles.transactionAmount, { color: '#EF4444' }]}>
                 -{formatCurrency(45.50, 'USD')}
               </Text>
             </View>
 
             {/* Transfer Transaction */}
-            <View style={styles.transactionItem}>
-              <View style={[styles.transactionIcon, { backgroundColor: darkColors.transferLight }]}>
-                <Text style={styles.transactionEmoji}>🔄</Text>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
+                <Ionicons name="swap-horizontal" size={20} color={colors.text} />
               </View>
               <View style={styles.transactionInfo}>
-                <Text style={styles.transactionTitle}>To Savings</Text>
-                <Text style={styles.transactionDate}>Feb 17, 2:15 PM</Text>
+                <Text style={[styles.transactionTitle, { color: colors.text }]}>To Savings</Text>
+                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Feb 17, 2:15 PM</Text>
               </View>
-              <Text style={[styles.transactionAmount, { color: darkColors.transfer }]}>
+              <Text style={[styles.transactionAmount, { color: colors.text }]}>
                 {formatCurrency(500, 'USD')}
               </Text>
             </View>
 
             {/* More Expenses */}
-            <View style={styles.transactionItem}>
-              <View style={[styles.transactionIcon, { backgroundColor: darkColors.expenseLight }]}>
-                <Text style={styles.transactionEmoji}>🛒</Text>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
+                <Ionicons name="cart" size={20} color="#EF4444" />
               </View>
               <View style={styles.transactionInfo}>
-                <Text style={styles.transactionTitle}>Groceries</Text>
-                <Text style={styles.transactionDate}>Feb 16, 3:45 PM</Text>
+                <Text style={[styles.transactionTitle, { color: colors.text }]}>Groceries</Text>
+                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Feb 16, 3:45 PM</Text>
               </View>
-              <Text style={[styles.transactionAmount, { color: darkColors.expense }]}>
+              <Text style={[styles.transactionAmount, { color: '#EF4444' }]}>
                 -{formatCurrency(127.89, 'USD')}
               </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Accounts */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Accounts</Text>
-          <View style={styles.accountsList}>
-            <View style={[styles.accountCard, { borderLeftColor: darkColors.chart1 }]}>
-              <View style={styles.accountHeader}>
-                <Text style={styles.accountName}>Chase Checking</Text>
-                <Text style={styles.accountType}>Bank Account</Text>
-              </View>
-              <Text style={styles.accountBalance}>{formatCurrency(8547.89, 'USD')}</Text>
-            </View>
-
-            <View style={[styles.accountCard, { borderLeftColor: darkColors.chart2 }]}>
-              <View style={styles.accountHeader}>
-                <Text style={styles.accountName}>Savings</Text>
-                <Text style={styles.accountType}>Savings</Text>
-              </View>
-              <Text style={styles.accountBalance}>{formatCurrency(4000, 'USD')}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Categories Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Top Spending</Text>
-          <View style={styles.categoriesList}>
-            <View style={styles.categoryItem}>
-              <View style={styles.categoryLeft}>
-                <View style={[styles.categoryDot, { backgroundColor: darkColors.chart3 }]} />
-                <Text style={styles.categoryName}>Food & Dining</Text>
-              </View>
-              <View style={styles.categoryRight}>
-                <Text style={styles.categoryAmount}>{formatCurrency(456.78, 'USD')}</Text>
-                <Text style={styles.categoryPercent}>32%</Text>
-              </View>
-            </View>
-
-            <View style={styles.categoryItem}>
-              <View style={styles.categoryLeft}>
-                <View style={[styles.categoryDot, { backgroundColor: darkColors.chart4 }]} />
-                <Text style={styles.categoryName}>Transportation</Text>
-              </View>
-              <View style={styles.categoryRight}>
-                <Text style={styles.categoryAmount}>{formatCurrency(234.50, 'USD')}</Text>
-                <Text style={styles.categoryPercent}>18%</Text>
-              </View>
-            </View>
-
-            <View style={styles.categoryItem}>
-              <View style={styles.categoryLeft}>
-                <View style={[styles.categoryDot, { backgroundColor: darkColors.chart5 }]} />
-                <Text style={styles.categoryName}>Shopping</Text>
-              </View>
-              <View style={styles.categoryRight}>
-                <Text style={styles.categoryAmount}>{formatCurrency(189.99, 'USD')}</Text>
-                <Text style={styles.categoryPercent}>14%</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -210,8 +139,8 @@ const DemoHomeScreen = () => {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
-        <Text style={styles.fabIcon}>+</Text>
+      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]}>
+        <Ionicons name="add" size={32} color={colors.background} />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -220,7 +149,6 @@ const DemoHomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: darkColors.background,
   },
   scrollView: {
     flex: 1,
@@ -240,32 +168,23 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: borderRadius.md,
-    backgroundColor: darkColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: darkColors.border,
-  },
-  themeToggleText: {
-    fontSize: 24,
   },
   greeting: {
     fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
-    color: darkColors.text,
     marginBottom: spacing.xs,
   },
   date: {
     fontSize: fontSize.md,
-    color: darkColors.textSecondary,
   },
   card: {
-    backgroundColor: darkColors.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: darkColors.border,
     ...shadows.sm,
   },
   balanceCard: {
@@ -273,13 +192,11 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: fontSize.sm,
-    color: darkColors.textSecondary,
     marginBottom: spacing.xs,
   },
   balanceAmount: {
     fontSize: 36,
     fontWeight: fontWeight.bold,
-    color: darkColors.text,
     marginBottom: spacing.lg,
   },
   balanceStats: {
@@ -291,7 +208,6 @@ const styles = StyleSheet.create({
   },
   balanceStatLabel: {
     fontSize: fontSize.xs,
-    color: darkColors.textSecondary,
     marginBottom: spacing.xs,
   },
   balanceStatValue: {
@@ -301,7 +217,6 @@ const styles = StyleSheet.create({
   balanceStatDivider: {
     width: 1,
     height: 32,
-    backgroundColor: darkColors.border,
     marginHorizontal: spacing.md,
   },
   section: {
@@ -316,34 +231,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
-    color: darkColors.text,
     marginBottom: spacing.md,
   },
   seeAll: {
     fontSize: fontSize.sm,
-    color: darkColors.primary,
     fontWeight: fontWeight.medium,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  actionButton: {
-    flex: 1,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 80,
-  },
-  actionEmoji: {
-    fontSize: 28,
-    marginBottom: spacing.xs,
-  },
-  actionLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.semibold,
-    color: darkColors.textOnBright,
   },
   transactionList: {
     gap: spacing.xs,
@@ -351,11 +243,9 @@ const styles = StyleSheet.create({
   transactionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surface,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: darkColors.border,
   },
   transactionIcon: {
     width: 44,
@@ -365,95 +255,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.md,
   },
-  transactionEmoji: {
-    fontSize: 20,
-  },
   transactionInfo: {
     flex: 1,
   },
   transactionTitle: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.medium,
-    color: darkColors.text,
     marginBottom: 2,
   },
   transactionDate: {
     fontSize: fontSize.xs,
-    color: darkColors.textSecondary,
   },
   transactionAmount: {
     fontSize: fontSize.base,
     fontWeight: fontWeight.semibold,
-  },
-  accountsList: {
-    gap: spacing.sm,
-  },
-  accountCard: {
-    backgroundColor: darkColors.surface,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    borderLeftWidth: 4,
-    borderWidth: 1,
-    borderColor: darkColors.border,
-  },
-  accountHeader: {
-    marginBottom: spacing.sm,
-  },
-  accountName: {
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-    color: darkColors.text,
-    marginBottom: 2,
-  },
-  accountType: {
-    fontSize: fontSize.xs,
-    color: darkColors.textSecondary,
-  },
-  accountBalance: {
-    fontSize: fontSize.xl,
-    fontWeight: fontWeight.bold,
-    color: darkColors.text,
-  },
-  categoriesList: {
-    gap: spacing.sm,
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: darkColors.surface,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: darkColors.border,
-  },
-  categoryLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: spacing.sm,
-  },
-  categoryName: {
-    fontSize: fontSize.md,
-    color: darkColors.text,
-  },
-  categoryRight: {
-    alignItems: 'flex-end',
-  },
-  categoryAmount: {
-    fontSize: fontSize.md,
-    fontWeight: fontWeight.semibold,
-    color: darkColors.text,
-    marginBottom: 2,
-  },
-  categoryPercent: {
-    fontSize: fontSize.xs,
-    color: darkColors.textSecondary,
   },
   fab: {
     position: 'absolute',
@@ -462,15 +277,9 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: darkColors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.lg,
-  },
-  fabIcon: {
-    fontSize: 32,
-    color: darkColors.textOnBright,
-    fontWeight: fontWeight.light,
   },
 });
 
