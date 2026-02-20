@@ -13,6 +13,7 @@ export const darkColors = {
   backgroundSecondary: '#0A0A0A', // Slightly lighter black
   surface: '#202020',           // Dark gray surface (blurred off-white feel)
   surfaceHighlight: '#1A1A1A',  // Slightly lighter gray for highlights
+  surfaceHover: '#2A2A2A',      // Hover state for surfaces
   
   // Text colors
   text: '#E5E5E5',              // Darker off-white primary text
@@ -49,6 +50,7 @@ export const darkColors = {
   primaryHover: '#F5F5F5',      // Lighter off-white hover
   primaryPressed: '#D4D4D4',    // Medium gray pressed
   primaryLight: 'rgba(229, 229, 229, 0.1)', // Transparent with darker off-white tint
+  primaryTransparent: 'rgba(229, 229, 229, 0.15)', // Transparent for backgrounds
   
   // Secondary colors (transparent with off-white edges)
   secondary: 'transparent',     // Transparent

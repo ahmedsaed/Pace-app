@@ -381,40 +381,561 @@ CREATE TABLE settings (
 
 ---
 
-## Key Features to Implement
+## Implementation Plan - Feature-Based Approach
 
-### Phase 1: Core Functionality (MVP)
-- [ ] Account management (CRUD)
-- [ ] Category management (CRUD)
-- [ ] Transaction recording (Income, Expense, Transfer)
-- [ ] Records page with filtering
-- [ ] Basic statistics/summary
-- [ ] SQLite database setup
-- [ ] Navigation structure
+Each feature includes its own database schema, state management, UI components, and business logic. Features build on each other progressively.
 
-### Phase 2: Enhanced Features
-- [ ] Ergonomic add transaction screen (one-handed optimized)
-- [ ] Attachments (camera, PDF support)
-- [ ] Large notes field with inline action buttons
-- [ ] Analysis page with charts
-- [ ] Budget tracking
-- [ ] Search functionality
-- [ ] Date range filtering
-- [ ] Export data (CSV)
-- [ ] Modern minimal UI theme (dark & light modes)
+### ✅ Feature 0: Foundation & Theme
+**Status**: Completed
+- [x] Project setup with dependencies
+- [x] TypeScript types and interfaces
+- [x] Constants and default data
+- [x] Modern minimal dark theme (off-white, dark gray cards, no shadows)
+- [x] Formatting utilities (currency, date, number)
+- [x] Calculation utilities (balance, statistics, trends)
+- [x] Demo home screen to showcase theme
 
-### Phase 3: Advanced Features
-- [ ] AI-powered receipt analysis (OCR, auto-populate)
-- [ ] Recurring transactions
-- [ ] Notifications & reminders
-- [ ] Multiple currencies with exchange rates
+---
+
+### Feature 1: Account Management 💳
+**Goal**: Users can create and manage their financial accounts
+
+**Database**:
+```sql
+CREATE TABLE accounts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  initial_balance REAL NOT NULL,
+  current_balance REAL NOT NULL,
+  currency TEXT DEFAULT 'USD',
+  include_in_total BOOLEAN DEFAULT 1,
+  color TEXT,
+  icon TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**State Management**:
+- Zustand store for accounts (`useAccountStore`)
+- Actions: createAccount, updateAccount, deleteAccount, getAccounts
+- Selectors: getTotalBalance, getAccountsByType
+
+**UI Components**:
+- AccountCard component (displays account with balance)
+- AccountForm component (add/edit account)
+- AccountList component
+- AccountIconPicker component
+- AccountColorPicker component
+
+**Pages**:
+- AccountsScreen (list all accounts)
+- AddAccountScreen (create new account)
+- EditAccountScreen (modify existing account)
+- AccountDetailScreen (view transactions for account)
+
+**Tasks**:
+- [ ] Set up SQLite database with accounts table
+- [ ] Create account database queries (insert, update, delete, select)
+- [ ] Build Zustand store for accounts
+- [ ] Create common UI components (Button, Input, Select, ColorPicker, IconPicker)
+- [ ] Build AccountCard component
+- [ ] Build AccountForm component
+- [ ] Implement AccountsScreen
+- [ ] Implement Add/Edit Account screens
+- [ ] Add navigation for accounts flow
+- [ ] Test account CRUD operations
+
+---
+
+### Feature 2: Category Management 🏷️
+**Goal**: Users can create and customize income/expense categories
+
+**Database**:
+```sql
+CREATE TABLE categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'income' or 'expense'
+  icon TEXT,
+  color TEXT,
+  parent_id INTEGER,
+  is_default BOOLEAN DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (parent_id) REFERENCES categories(id)
+);
+```
+
+**State Management**:
+- Zustand store for categories (`useCategoryStore`)
+- Actions: createCategory, updateCategory, deleteCategory, seedDefaultCategories
+- Selectors: getIncomeCategories, getExpenseCategories, getCategoryTree
+
+**UI Components**:
+- CategoryCard component
+- CategoryForm component
+- CategoryList component (with subcategory grouping)
+- CategoryPicker component (bottom sheet)
+
+**Pages**:
+- CategoriesScreen (list and manage categories)
+- AddCategoryScreen
+- EditCategoryScreen
+
+**Tasks**:
+- [ ] Create categories table
+- [ ] Seed database with default categories on first launch
+- [ ] Create category database queries
+- [ ] Build Zustand store for categories
+- [ ] Build CategoryCard component
+- [ ] Build CategoryForm component
+- [ ] Build CategoryPicker bottom sheet
+- [ ] Implement CategoriesScreen
+- [ ] Implement Add/Edit Category screens
+- [ ] Add navigation for categories flow
+- [ ] Test category CRUD operations with subcategories
+
+---
+
+### Feature 3: Basic Transaction Recording 💰
+**Goal**: Users can record income, expense, and transfer transactions
+
+**Database**:
+```sql
+CREATE TABLE transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL, -- 'income', 'expense', 'transfer'
+  amount REAL NOT NULL,
+  date DATETIME NOT NULL,
+  account_id INTEGER NOT NULL,
+  category_id INTEGER,
+  to_account_id INTEGER, -- for transfers
+  note TEXT,
+  is_recurring BOOLEAN DEFAULT 0,
+  recurring_id INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES accounts(id),
+  FOREIGN KEY (category_id) REFERENCES categories(id),
+  FOREIGN KEY (to_account_id) REFERENCES accounts(id)
+);
+```
+
+**State Management**:
+- Zustand store for transactions (`useTransactionStore`)
+- Actions: createTransaction, updateTransaction, deleteTransaction, getTransactions
+- Selectors: getTransactionsByDateRange, getTransactionsByAccount, getTransactionsByCategory
+
+**UI Components**:
+- TransactionCard component
+- TransactionForm component (simplified version)
+- AmountInput component
+- DateTimePicker component
+- AccountPicker component
+- TransactionTypeToggle component
+
+**Pages**:
+- AddTransactionScreen (basic form)
+- EditTransactionScreen
+- TransactionDetailScreen
+
+**Tasks**:
+- [ ] Create transactions table
+- [ ] Create transaction database queries
+- [ ] Build Zustand store for transactions
+- [ ] Build TransactionCard component
+- [ ] Build basic TransactionForm
+- [ ] Build AmountInput component
+- [ ] Build DateTimePicker component
+- [ ] Build AccountPicker component
+- [ ] Implement basic AddTransactionScreen
+- [ ] Implement EditTransactionScreen
+- [ ] Implement TransactionDetailScreen
+- [ ] Update account balances when transactions are added/edited/deleted
+- [ ] Add FAB button to home screen
+- [ ] Test transaction CRUD operations
+- [ ] Test balance calculations
+
+---
+
+### Feature 4: Records Page (Home) 🏠
+**Goal**: Display transactions with filtering and search
+
+**State Management**:
+- Filters state in Zustand (`useFilterStore`)
+- Actions: setDateRange, setAccountFilter, setCategoryFilter, setSearchQuery
+
+**UI Components**:
+- TransactionList component
+- SummaryCards component (Income, Expense, Net)
+- FilterBar component
+- SearchBar component
+- PeriodSelector component (Today, Week, Month, Custom)
+- EmptyState component
+
+**Pages**:
+- HomeScreen (Records page) - replace DemoHomeScreen
+
+**Tasks**:
+- [ ] Build TransactionList with grouping by date
+- [ ] Build SummaryCards component
+- [ ] Build FilterBar component
+- [ ] Build SearchBar component
+- [ ] Build PeriodSelector component
+- [ ] Implement HomeScreen with real data
+- [ ] Add swipe actions for edit/delete
+- [ ] Add pull to refresh
+- [ ] Implement search functionality
+- [ ] Implement filter logic
+- [ ] Test with large datasets
+
+---
+
+### Feature 5: Navigation & Bottom Tabs 🧭
+**Goal**: Set up app navigation structure
+
+**Structure**:
+- Bottom Tab Navigator:
+  - Records (Home)
+  - Analysis
+  - Budgets
+  - More (Settings)
+- Stack Navigator for each tab
+
+**Tasks**:
+- [ ] Set up React Navigation
+- [ ] Create bottom tab navigator
+- [ ] Create stack navigators for each tab
+- [ ] Add tab icons and labels
+- [ ] Implement navigation helpers
+- [ ] Test navigation flow
+
+---
+
+### Feature 6: Analysis & Charts 📊
+**Goal**: Provide financial insights and visualizations
+
+**UI Components**:
+- PieChart component (spending by category)
+- LineChart component (income vs expenses over time)
+- BarChart component (top categories)
+- InsightCard component
+- PeriodComparison component
+
+**Pages**:
+- AnalysisScreen
+
+**Tasks**:
+- [ ] Set up react-native-chart-kit
+- [ ] Build chart components
+- [ ] Implement data aggregation for charts
+- [ ] Build InsightCard component
+- [ ] Build AnalysisScreen
+- [ ] Add period selector
+- [ ] Add account/category filters
+- [ ] Calculate insights (trends, averages, comparisons)
+- [ ] Test with various data ranges
+
+---
+
+### Feature 7: Budget Tracking 💰
+**Goal**: Users can set and track spending budgets
+
+**Database**:
+```sql
+CREATE TABLE budgets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  amount REAL NOT NULL,
+  period TEXT NOT NULL, -- 'weekly', 'monthly', 'yearly'
+  category_id INTEGER,
+  start_date DATETIME NOT NULL,
+  end_date DATETIME,
+  is_active BOOLEAN DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+```
+
+**State Management**:
+- Zustand store for budgets (`useBudgetStore`)
+- Actions: createBudget, updateBudget, deleteBudget, getBudgets
+- Selectors: getBudgetProgress, getBudgetStatus
+
+**UI Components**:
+- BudgetCard component (with progress bar)
+- BudgetForm component
+- BudgetProgressBar component
+
+**Pages**:
+- BudgetsScreen
+- AddBudgetScreen
+- EditBudgetScreen
+
+**Tasks**:
+- [ ] Create budgets table
+- [ ] Create budget database queries
+- [ ] Build Zustand store for budgets
+- [ ] Build BudgetCard component
+- [ ] Build BudgetForm component
+- [ ] Implement BudgetsScreen
+- [ ] Implement Add/Edit Budget screens
+- [ ] Calculate budget progress
+- [ ] Add budget alerts (approaching/exceeding)
+- [ ] Test budget calculations
+
+---
+
+### Feature 8: Ergonomic Transaction Entry 📱
+**Goal**: Optimized one-handed transaction entry with custom number pad
+
+**UI Components**:
+- CustomNumberPad component (bottom-positioned)
+- LargeAmountDisplay component
+- QuickCategoryChips component
+- InlineNoteField component (with camera/attachment buttons)
+
+**Pages**:
+- ErgonomicAddTransactionScreen (replaces basic add screen)
+
+**Tasks**:
+- [ ] Design ergonomic layout (bottom-up approach)
+- [ ] Build CustomNumberPad component
+- [ ] Build LargeAmountDisplay component
+- [ ] Build QuickCategoryChips (recent categories)
+- [ ] Implement auto-focus chain (amount → category → account)
+- [ ] Add keyboard shortcuts (Enter to next field)
+- [ ] Build bottom-positioned category picker
+- [ ] Build bottom-positioned account picker
+- [ ] Test one-handed usability
+- [ ] Add gesture support for transaction type
+
+---
+
+### Feature 9: Attachments & Receipt Capture 📷
+**Goal**: Users can attach photos and PDFs to transactions
+
+**Database**:
+```sql
+CREATE TABLE attachments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  transaction_id INTEGER NOT NULL,
+  file_path TEXT NOT NULL,
+  file_type TEXT NOT NULL, -- 'image', 'pdf'
+  file_name TEXT,
+  ai_processed BOOLEAN DEFAULT 0,
+  ai_extracted_data TEXT, -- JSON string
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE
+);
+```
+
+**State Management**:
+- Attachment management in transaction store
+- File system operations
+
+**UI Components**:
+- AttachmentPreview component
+- CameraCapture component
+- DocumentPicker component
+
+**Tasks**:
+- [ ] Create attachments table
+- [ ] Set up expo-camera integration
+- [ ] Set up expo-document-picker integration
+- [ ] Build file storage system
+- [ ] Build AttachmentPreview component
+- [ ] Add camera button to transaction form
+- [ ] Add document picker to transaction form
+- [ ] Implement image compression
+- [ ] Test attachment saving and retrieval
+
+---
+
+### Feature 10: AI-Powered Receipt Analysis 🤖
+**Goal**: Auto-populate transaction details from receipts using AI
+
+**Integration**:
+- OpenAI GPT-4 Vision API (or alternative OCR service)
+- Image preprocessing
+
+**UI Components**:
+- AIAnalysisButton component (appears with attachments)
+- AIReviewModal component (shows extracted data)
+- LoadingIndicator component
+
+**Tasks**:
+- [ ] Choose AI service (OpenAI, Google Vision, AWS Textract)
+- [ ] Set up API integration
+- [ ] Build AIAnalysisButton component
+- [ ] Build AIReviewModal component
+- [ ] Implement image preprocessing
+- [ ] Implement AI API call
+- [ ] Parse AI response (extract amount, date, merchant, category)
+- [ ] Allow user to review and edit before saving
+- [ ] Store AI extracted data in attachments table
+- [ ] Test with various receipt types
+- [ ] Handle API errors gracefully
+
+---
+
+### Feature 11: Recurring Transactions 🔄
+**Goal**: Manage subscriptions and regular transactions
+
+**Database**:
+```sql
+CREATE TABLE recurring_transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL,
+  amount REAL NOT NULL,
+  frequency TEXT NOT NULL, -- 'daily', 'weekly', 'monthly', 'yearly'
+  account_id INTEGER NOT NULL,
+  category_id INTEGER,
+  to_account_id INTEGER,
+  note TEXT,
+  start_date DATETIME NOT NULL,
+  end_date DATETIME,
+  next_due_date DATETIME NOT NULL,
+  auto_record BOOLEAN DEFAULT 0,
+  is_active BOOLEAN DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES accounts(id),
+  FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+```
+
+**State Management**:
+- Zustand store for recurring transactions
+
+**UI Components**:
+- RecurringTransactionCard component
+- RecurringForm component
+- FrequencyPicker component
+- UpcomingTransactionsCalendar component
+
+**Pages**:
+- RecurringTransactionsScreen
+- AddRecurringScreen
+- EditRecurringScreen
+
+**Tasks**:
+- [ ] Create recurring_transactions table
+- [ ] Build Zustand store for recurring transactions
+- [ ] Build RecurringForm component
+- [ ] Build FrequencyPicker component
+- [ ] Implement RecurringTransactionsScreen
+- [ ] Implement Add/Edit Recurring screens
+- [ ] Build background task to check for due recurring transactions
+- [ ] Implement notification for due transactions
+- [ ] Add option for auto-record or manual confirmation
+- [ ] Calculate next due dates
+- [ ] Test various frequency patterns
+
+---
+
+### Feature 12: Settings & Preferences ⚙️
+**Goal**: App configuration and user preferences
+
+**Database**:
+```sql
+CREATE TABLE settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**UI Components**:
+- SettingsSection component
+- SettingItem component
+- ThemePicker component
+- CurrencyPicker component
+
+**Pages**:
+- SettingsScreen
+- ProfileScreen
+- AboutScreen
+- BackupRestoreScreen
+
+**Tasks**:
+- [ ] Create settings table
+- [ ] Seed default settings
+- [ ] Build SettingsScreen
+- [ ] Implement theme switching (dark/light)
+- [ ] Implement default currency selection
+- [ ] Implement default account selection
+- [ ] Add data export (CSV)
+- [ ] Add backup & restore functionality
+- [ ] Add about page with version info
+- [ ] Test settings persistence
+
+---
+
+### Feature 13: Search & Advanced Filtering 🔍
+**Goal**: Powerful search and filter capabilities
+
+**UI Components**:
+- AdvancedFilterModal component
+- MultiSelect components (accounts, categories, types)
+- AmountRangeSlider component
+- DateRangePicker component
+
+**Tasks**:
+- [ ] Build AdvancedFilterModal
+- [ ] Implement full-text search in transactions
+- [ ] Add amount range filtering
+- [ ] Add multi-select for accounts
+- [ ] Add multi-select for categories
+- [ ] Add multi-select for transaction types
+- [ ] Implement filter combinations
+- [ ] Add save filter presets
+- [ ] Test complex filter scenarios
+
+---
+
+### Feature 14: Data Export & Reports 📄
+**Goal**: Export data and generate reports
+
+**Tasks**:
+- [ ] Implement CSV export for transactions
+- [ ] Implement CSV export for accounts
+- [ ] Implement PDF report generation
+- [ ] Add monthly report generation
+- [ ] Add yearly report generation
+- [ ] Add custom date range reports
+- [ ] Include charts in PDF reports
+- [ ] Add email sharing option
+- [ ] Test export with large datasets
+
+---
+
+### Feature 15: Notifications & Reminders 🔔
+**Goal**: Remind users about budgets, recurring transactions, and insights
+
+**Tasks**:
+- [ ] Set up expo-notifications
+- [ ] Request notification permissions
+- [ ] Implement budget alert notifications
+- [ ] Implement recurring transaction reminders
+- [ ] Implement unusual spending alerts
+- [ ] Add notification preferences in settings
+- [ ] Test notification scheduling
+- [ ] Test notification actions
+
+---
+
+### Future Features (Backlog)
+- [ ] Multi-currency support with exchange rates
 - [ ] Cloud backup & sync
-- [ ] Biometric authentication
-
-### Phase 4: Optional/Future Features
+- [ ] Biometric authentication (PIN, Face ID, Touch ID)
 - [ ] SMS/Notification parsing with review queue
 - [ ] Investment & portfolio tracking
-- [ ] Bank account integration
+- [ ] Bank account integration (Plaid)
+- [ ] Shared accounts / Family mode
+- [ ] Goal tracking (savings goals, debt payoff)
+- [ ] Home screen widgets
+- [ ] Calendar integration
 - [ ] Advanced AI categorization
 - [ ] Predictive insights
 
@@ -565,4 +1086,4 @@ CREATE TABLE settings (
 
 ---
 
-*Last Updated: February 19, 2026*
+*Last Updated: February 20, 2026*

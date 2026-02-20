@@ -1,12 +1,19 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import DemoHomeScreen from './src/app/screens/DemoHomeScreen';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import TabNavigator from './src/app/navigation/TabNavigator';
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <DemoHomeScreen />
-    </SafeAreaView>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <TabNavigator />
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

@@ -7,15 +7,18 @@ import {
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { darkColors } from '../../utils/colors';
 import { spacing, fontSize, fontWeight, borderRadius, shadows } from '../../styles/theme';
 import { formatCurrency, formatDate } from '../../utils/formatting';
+import { useThemeStore } from '../../store/themeStore';
 
 const DemoHomeScreen = () => {
   const currentDate = new Date();
+  const { mode, toggleTheme } = useThemeStore();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="light-content" backgroundColor={darkColors.background} />
       
       <ScrollView 
@@ -25,8 +28,13 @@ const DemoHomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hello, Ahmed! 👋</Text>
-          <Text style={styles.date}>{formatDate(currentDate, 'EEEE, MMMM dd')}</Text>
+          <View>
+            <Text style={styles.greeting}>Hello, Ahmed! 👋</Text>
+            <Text style={styles.date}>{formatDate(currentDate, 'EEEE, MMMM dd')}</Text>
+          </View>
+          <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+            <Text style={styles.themeToggleText}>{mode === 'dark' ? '🌙' : '☀️'}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Balance Card */}
@@ -198,13 +206,14 @@ const DemoHomeScreen = () => {
             </View>
           </View>
         </View>
+
       </ScrollView>
 
       {/* Floating Action Button */}
       <TouchableOpacity style={styles.fab}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -217,11 +226,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     paddingBottom: 100,
   },
   header: {
     marginBottom: spacing.lg,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  themeToggle: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.md,
+    backgroundColor: darkColors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: darkColors.border,
+  },
+  themeToggleText: {
+    fontSize: 24,
   },
   greeting: {
     fontSize: fontSize.xxl,

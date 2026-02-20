@@ -1,6 +1,13 @@
 /**
  * Theme Configuration
  * Centralized theme system for the app with spacing, typography, and more
+ * 
+ * LAYOUT GUIDELINES:
+ * - All screens should use spacing.lg (24px) for horizontal padding/margins
+ * - ScrollViews: Use paddingHorizontal: spacing.lg in contentContainerStyle
+ * - Regular Views: Wrap content in a View with paddingHorizontal: spacing.lg
+ * - Forms: Use paddingHorizontal: spacing.lg directly on the container
+ * - This ensures consistent margins across all pages
  */
 
 import { darkColors, lightColors } from '../utils/colors';
