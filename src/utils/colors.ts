@@ -118,6 +118,7 @@ export const lightColors = {
   primaryHover: '#2563EB',      // Hover state
   primaryPressed: '#1D4ED8',    // Pressed state
   primaryLight: '#DBEAFE',      // Light variant
+  primaryTransparent: 'rgba(59, 130, 246, 0.15)', // Transparent for backgrounds
   
   // Secondary colors
   secondary: '#8B5CF6',         // Purple accent

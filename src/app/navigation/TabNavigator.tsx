@@ -1,15 +1,18 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import RecordsScreen from '../screens/RecordsScreen';
 import AccountsStackNavigator from './AccountsStackNavigator';
+import { CategoriesStackNavigator } from './CategoriesStackNavigator';
 import { useColors } from '../../hooks/useColors';
-import { spacing, fontSize, borderRadius } from '../../styles/theme';
+import { spacing, fontSize } from '../../styles/theme';
 
 export type TabParamList = {
   Records: undefined;
   Accounts: undefined;
+  Categories: undefined;
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -41,9 +44,12 @@ const TabNavigator = () => {
         component={RecordsScreen}
         options={{
           tabBarLabel: 'Records',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={[styles.iconContainer, focused && { ...styles.iconContainerActive, backgroundColor: colors.primaryTransparent || 'rgba(59, 130, 246, 0.15)' }]}>
-              <Text style={[styles.iconText, { color }]}>📝</Text>
+          tabBarIcon: ({ focused }) => (
+            <View style={[
+              styles.iconContainer, 
+              focused && { backgroundColor: colors.primaryTransparent }
+            ]}>
+              <Ionicons name="receipt-outline" size={24} color={colors.primary} />
             </View>
           ),
         }}
@@ -53,9 +59,27 @@ const TabNavigator = () => {
         component={AccountsStackNavigator}
         options={{
           tabBarLabel: 'Accounts',
-          tabBarIcon: ({ focused, color }) => (
-            <View style={[styles.iconContainer, focused && { ...styles.iconContainerActive, backgroundColor: colors.primaryTransparent || 'rgba(59, 130, 246, 0.15)' }]}>
-              <Text style={[styles.iconText, { color }]}>💳</Text>
+          tabBarIcon: ({ focused }) => (
+            <View style={[
+              styles.iconContainer,
+              focused && { backgroundColor: colors.primaryTransparent }
+            ]}>
+              <Ionicons name="wallet-outline" size={24} color={colors.primary} />
+            </View>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Categories"
+        component={CategoriesStackNavigator}
+        options={{
+          tabBarLabel: 'Categories',
+          tabBarIcon: ({ focused }) => (
+            <View style={[
+              styles.iconContainer,
+              focused && { backgroundColor: colors.primaryTransparent }
+            ]}>
+              <Ionicons name="pricetags-outline" size={24} color={colors.primary} />
             </View>
           ),
         }}
@@ -70,7 +94,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   tabBarLabel: {
-    fontSize: fontSize.xs,
+    fontSize: fontSize.sm,
     fontWeight: '600' as any,
     marginTop: spacing.xs,
   },
@@ -78,18 +102,11 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   iconContainer: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.lg,
-    minWidth: 50,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconContainerActive: {
-    // Background color set inline with dynamic colors
-  },
-  iconText: {
-    fontSize: 24,
   },
 });
 

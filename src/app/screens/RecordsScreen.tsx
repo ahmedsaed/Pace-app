@@ -47,7 +47,7 @@ const DemoHomeScreen = () => {
         </View>
 
         {/* Balance Card */}
-        <View style={[styles.card, styles.balanceCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.card, styles.balanceCard, { backgroundColor: colors.surface }]}>
           <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Total Balance</Text>
           <Text style={[styles.balanceAmount, { color: colors.text }]}>{formatCurrency(12547.89, 'USD')}</Text>
           <View style={styles.balanceStats}>
@@ -71,7 +71,7 @@ const DemoHomeScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Transactions</Text>
-            <TouchableOpacity>
+            <TouchableOpacity style={[styles.seeAllButton, { backgroundColor: colors.surface }]}>
               <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -79,7 +79,7 @@ const DemoHomeScreen = () => {
           {/* Transaction Items */}
           <View style={styles.transactionList}>
             {/* Income Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
               <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
                 <Ionicons name="briefcase" size={20} color="#10B981" />
               </View>
@@ -93,7 +93,7 @@ const DemoHomeScreen = () => {
             </View>
 
             {/* Expense Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
               <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
                 <Ionicons name="restaurant" size={20} color="#EF4444" />
               </View>
@@ -107,7 +107,7 @@ const DemoHomeScreen = () => {
             </View>
 
             {/* Transfer Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
               <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
                 <Ionicons name="swap-horizontal" size={20} color={colors.text} />
               </View>
@@ -121,7 +121,7 @@ const DemoHomeScreen = () => {
             </View>
 
             {/* More Expenses */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
               <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
                 <Ionicons name="cart" size={20} color="#EF4444" />
               </View>
@@ -184,8 +184,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
-    borderWidth: 1,
-    ...shadows.sm,
   },
   balanceCard: {
     marginBottom: spacing.lg,
@@ -237,6 +235,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
   },
+  seeAllButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
   transactionList: {
     gap: spacing.xs,
   },
@@ -245,7 +248,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    borderWidth: 1,
   },
   transactionIcon: {
     width: 44,
