@@ -5,11 +5,11 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Account } from '../../utils/types';
 import { darkColors } from '../../utils/colors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../../styles/theme';
 import { formatCurrency } from '../../utils/formatting';
-import { getIconEmoji } from '../common/IconPicker';
 
 interface AccountCardProps {
   account: Account;
@@ -34,7 +34,11 @@ export const AccountCard: React.FC<AccountCardProps> = ({
     >
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <Text style={styles.icon}>{getIconEmoji(account.icon)}</Text>
+          <Ionicons 
+            name={(account.icon as any) || 'wallet'} 
+            size={24} 
+            color={darkColors.primary} 
+          />
         </View>
         <View style={styles.info}>
           <Text style={styles.name}>{account.name}</Text>
@@ -75,9 +79,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
-  },
-  icon: {
-    fontSize: 24,
   },
   info: {
     flex: 1,

@@ -18,12 +18,14 @@ interface CategoryFormProps {
   category?: Category;
   onSubmit: (category: Omit<Category, 'id' | 'createdAt'>) => void;
   onCancel: () => void;
+  onDelete?: () => void;
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
   category,
   onSubmit,
   onCancel,
+  onDelete,
 }) => {
   const colors = useColors();
   const [name, setName] = useState(category?.name || '');
@@ -40,14 +42,13 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       name: name.trim(),
       type,
       icon,
-      color: colors.primary, // Use theme primary color
       parentId: category?.parentId || null,
       isDefault: category?.isDefault || false,
     });
   };
 
   return (
-    <ScrollView style={[styles.container, { padding: spacing.lg }]}>
+    <ScrollView style={[styles.container, { padding: spacing.lg, marginTop: spacing.xl }]}>
       {/* Category Name */}
       <View style={styles.section}>
         <Text style={[styles.label, { color: colors.text }]}>Name</Text>
@@ -118,12 +119,12 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       <View style={styles.section}>
         <Text style={[styles.label, { color: colors.text }]}>Icon</Text>
         <TouchableOpacity
-          style={[styles.iconButton, { backgroundColor: colors.primary }]}
+          style={[styles.iconButton, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
           onPress={() => setShowIconPicker(true)}
           activeOpacity={0.7}
         >
-          <Ionicons name={icon as any} size={32} color="#FFFFFF" />
-          <Text style={[styles.iconButtonText, { color: "#FFFFFF" }]}>
+          <Ionicons name={icon as any} size={32} color={colors.primary} />
+          <Text style={[styles.iconButtonText, { color: colors.text }]}>
             Tap to change icon
           </Text>
         </TouchableOpacity>
@@ -131,16 +132,28 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
 
       {/* Action Buttons */}
       <View style={styles.actions}>
-        <Button
-          title={category ? 'Update Category' : 'Create Category'}
-          onPress={handleSubmit}
-          disabled={!name.trim()}
-        />
-        <Button
-          title="Cancel"
-          variant="secondary"
-          onPress={onCancel}
-        />
+        {category && onDelete ? (
+          <View style={styles.buttonRow}>
+            <Button
+              title="Delete"
+              variant="danger"
+              onPress={onDelete}
+              style={styles.halfButton}
+            />
+            <Button
+              title="Update"
+              onPress={handleSubmit}
+              disabled={!name.trim()}
+              style={styles.halfButton}
+            />
+          </View>
+        ) : (
+          <Button
+            title="Create"
+            onPress={handleSubmit}
+            disabled={!name.trim()}
+          />
+        )}
       </View>
 
       {/* Icon Picker Modal */}
@@ -225,5 +238,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginTop: spacing.lg,
     marginBottom: spacing.xl,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  halfButton: {
+    flex: 1,
+    height: 52,
   },
 });

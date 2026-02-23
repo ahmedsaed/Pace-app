@@ -58,7 +58,6 @@ export const initializeDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         icon TEXT,
-        color TEXT,
         parent_id INTEGER,
         is_default INTEGER DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,

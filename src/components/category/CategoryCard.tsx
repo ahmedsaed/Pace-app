@@ -31,7 +31,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, { backgroundColor: category.color || colors.primary }]}>
+      <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
         <Ionicons 
           name={category.icon as any || 'pricetag'} 
           size={28} 

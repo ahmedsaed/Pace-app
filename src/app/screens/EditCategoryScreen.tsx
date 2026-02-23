@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategoryStore } from '../../store/categoryStore';
 import { CategoryForm } from '../../components/category/CategoryForm';
 import { useColors } from '../../hooks/useColors';
@@ -57,37 +57,23 @@ export const EditCategoryScreen = ({ route, navigation }: any) => {
     navigation.goBack();
   };
 
-  // Set delete button in header
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={handleDelete}
-          style={{ marginRight: 16 }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="trash-outline" size={24} color={colors.error} />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, colors]);
-
   if (!category) {
     return (
-      <View style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.container, styles.loadingContainer, { backgroundColor: colors.background }]} edges={['top']}>
         <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <CategoryForm
         category={category}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        onDelete={handleDelete}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

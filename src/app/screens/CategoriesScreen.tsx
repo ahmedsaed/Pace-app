@@ -12,6 +12,7 @@ import { CategoryList } from '../../components/category/CategoryList';
 import { spacing, fontSize, fontWeight } from '../../styles/theme';
 import { useColors } from '../../hooks/useColors';
 import { Category } from '../../utils/types';
+import { initializeDatabase } from '../../db/database';
 
 type TabType = 'expense' | 'income';
 
@@ -33,11 +34,17 @@ export const CategoriesScreen = ({ navigation }: any) => {
   }, []);
 
   const loadCategories = async () => {
-    await fetchCategories();
-    
-    // Seed default categories if none exist
-    if (categories.length === 0) {
+    try {
+      // Initialize database first
+      await initializeDatabase();
+      
+      // Seed default categories if database is empty
       await seedDefaults();
+      
+      // Fetch all categories
+      await fetchCategories();
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -154,7 +161,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   title: {
-    fontSize: fontSize.xl,
+    fontSize: fontSize.xxxl,
     fontWeight: fontWeight.bold as any,
   },
   addButton: {

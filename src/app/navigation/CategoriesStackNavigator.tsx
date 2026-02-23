@@ -9,6 +9,7 @@ import { CategoriesScreen } from '../screens/CategoriesScreen';
 import { AddCategoryScreen } from '../screens/AddCategoryScreen';
 import { EditCategoryScreen } from '../screens/EditCategoryScreen';
 import { useColors } from '../../hooks/useColors';
+import { fontSize } from '../../styles/theme';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export const CategoriesStackNavigator = () => {
         headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: '600',
+          fontSize: fontSize.xxxl,
         },
         headerShadowVisible: false,
         animation: 'fade',

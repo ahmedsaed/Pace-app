@@ -11,69 +11,68 @@ import { Category } from '../../utils/types';
  */
 const DEFAULT_CATEGORIES: Omit<Category, 'id' | 'createdAt'>[] = [
   // Income Categories
-  { name: 'Salary', type: 'income', icon: 'briefcase', color: '#10B981', parentId: null, isDefault: true },
-  { name: 'Freelance', type: 'income', icon: 'laptop', color: '#059669', parentId: null, isDefault: true },
-  { name: 'Business', type: 'income', icon: 'business', color: '#047857', parentId: null, isDefault: true },
-  { name: 'Investments', type: 'income', icon: 'trending-up', color: '#065F46', parentId: null, isDefault: true },
-  { name: 'Gifts', type: 'income', icon: 'gift', color: '#10B981', parentId: null, isDefault: true },
-  { name: 'Refunds', type: 'income', icon: 'return-up-back', color: '#059669', parentId: null, isDefault: true },
-  { name: 'Other Income', type: 'income', icon: 'add-circle', color: '#047857', parentId: null, isDefault: true },
+  { name: 'Salary', type: 'income', icon: 'briefcase', parentId: null, isDefault: true },
+  { name: 'Freelance', type: 'income', icon: 'laptop', parentId: null, isDefault: true },
+  { name: 'Business', type: 'income', icon: 'business', parentId: null, isDefault: true },
+  { name: 'Investments', type: 'income', icon: 'trending-up', parentId: null, isDefault: true },
+  { name: 'Gifts', type: 'income', icon: 'gift', parentId: null, isDefault: true },
+  { name: 'Refunds', type: 'income', icon: 'return-up-back', parentId: null, isDefault: true },
+  { name: 'Other Income', type: 'income', icon: 'add-circle', parentId: null, isDefault: true },
 
   // Expense Categories - Food & Dining
-  { name: 'Food & Dining', type: 'expense', icon: 'restaurant', color: '#EF4444', parentId: null, isDefault: true },
-  { name: 'Groceries', type: 'expense', icon: 'cart', color: '#DC2626', parentId: null, isDefault: true },
-  { name: 'Dining Out', type: 'expense', icon: 'fast-food', color: '#B91C1C', parentId: null, isDefault: true },
-  { name: 'Coffee & Drinks', type: 'expense', icon: 'cafe', color: '#991B1B', parentId: null, isDefault: true },
+  { name: 'Food & Dining', type: 'expense', icon: 'restaurant', parentId: null, isDefault: true },
+  { name: 'Groceries', type: 'expense', icon: 'cart', parentId: null, isDefault: true },
+  { name: 'Dining Out', type: 'expense', icon: 'fast-food', parentId: null, isDefault: true },
+  { name: 'Coffee & Drinks', type: 'expense', icon: 'cafe', parentId: null, isDefault: true },
 
   // Transportation
-  { name: 'Transportation', type: 'expense', icon: 'car', color: '#F59E0B', parentId: null, isDefault: true },
-  { name: 'Gas', type: 'expense', icon: 'gas-station', color: '#D97706', parentId: null, isDefault: true },
-  { name: 'Public Transit', type: 'expense', icon: 'bus', color: '#B45309', parentId: null, isDefault: true },
-  { name: 'Parking', type: 'expense', icon: 'car-sport', color: '#92400E', parentId: null, isDefault: true },
+  { name: 'Transportation', type: 'expense', icon: 'car', parentId: null, isDefault: true },
+  { name: 'Gas', type: 'expense', icon: 'speedometer', parentId: null, isDefault: true },
+  { name: 'Public Transit', type: 'expense', icon: 'bus', parentId: null, isDefault: true },
+  { name: 'Parking', type: 'expense', icon: 'car-sport', parentId: null, isDefault: true },
 
   // Shopping
-  { name: 'Shopping', type: 'expense', icon: 'bag-handle', color: '#8B5CF6', parentId: null, isDefault: true },
-  { name: 'Clothing', type: 'expense', icon: 'shirt', color: '#7C3AED', parentId: null, isDefault: true },
-  { name: 'Electronics', type: 'expense', icon: 'phone-portrait', color: '#6D28D9', parentId: null, isDefault: true },
-  { name: 'Home & Garden', type: 'expense', icon: 'home', color: '#5B21B6', parentId: null, isDefault: true },
+  { name: 'Shopping', type: 'expense', icon: 'bag-handle', parentId: null, isDefault: true },
+  { name: 'Clothing', type: 'expense', icon: 'shirt', parentId: null, isDefault: true },
+  { name: 'Electronics', type: 'expense', icon: 'phone-portrait', parentId: null, isDefault: true },
+  { name: 'Home & Garden', type: 'expense', icon: 'home', parentId: null, isDefault: true },
 
   // Bills & Utilities
-  { name: 'Bills & Utilities', type: 'expense', icon: 'document-text', color: '#3B82F6', parentId: null, isDefault: true },
-  { name: 'Rent/Mortgage', type: 'expense', icon: 'home-sharp', color: '#2563EB', parentId: null, isDefault: true },
-  { name: 'Electricity', type: 'expense', icon: 'flash', color: '#1D4ED8', parentId: null, isDefault: true },
-  { name: 'Water', type: 'expense', icon: 'water', color: '#1E40AF', parentId: null, isDefault: true },
-  { name: 'Internet', type: 'expense', icon: 'wifi', color: '#1E3A8A', parentId: null, isDefault: true },
-  { name: 'Phone', type: 'expense', icon: 'call', color: '#172554', parentId: null, isDefault: true },
+  { name: 'Bills & Utilities', type: 'expense', icon: 'document-text', parentId: null, isDefault: true },
+  { name: 'Rent/Mortgage', type: 'expense', icon: 'home-sharp', parentId: null, isDefault: true },
+  { name: 'Electricity', type: 'expense', icon: 'flash', parentId: null, isDefault: true },
+  { name: 'Water', type: 'expense', icon: 'water', parentId: null, isDefault: true },
+  { name: 'Internet', type: 'expense', icon: 'wifi', parentId: null, isDefault: true },
+  { name: 'Phone', type: 'expense', icon: 'call', parentId: null, isDefault: true },
 
   // Entertainment
-  { name: 'Entertainment', type: 'expense', icon: 'film', color: '#EC4899', parentId: null, isDefault: true },
-  { name: 'Movies & TV', type: 'expense', icon: 'tv', color: '#DB2777', parentId: null, isDefault: true },
-  { name: 'Games', type: 'expense', icon: 'game-controller', color: '#BE185D', parentId: null, isDefault: true },
-  { name: 'Events', type: 'expense', icon: 'ticket', color: '#9F1239', parentId: null, isDefault: true },
+  { name: 'Entertainment', type: 'expense', icon: 'film', parentId: null, isDefault: true },
+  { name: 'Movies & TV', type: 'expense', icon: 'tv', parentId: null, isDefault: true },
+  { name: 'Games', type: 'expense', icon: 'game-controller', parentId: null, isDefault: true },
+  { name: 'Events', type: 'expense', icon: 'ticket', parentId: null, isDefault: true },
 
   // Health & Fitness
-  { name: 'Health & Fitness', type: 'expense', icon: 'fitness', color: '#14B8A6', parentId: null, isDefault: true },
-  { name: 'Gym', type: 'expense', icon: 'barbell', color: '#0D9488', parentId: null, isDefault: true },
-  { name: 'Medical', type: 'expense', icon: 'medkit', color: '#0F766E', parentId: null, isDefault: true },
-  { name: 'Pharmacy', type: 'expense', icon: 'medical', color: '#115E59', parentId: null, isDefault: true },
+  { name: 'Health & Fitness', type: 'expense', icon: 'fitness', parentId: null, isDefault: true },
+  { name: 'Gym', type: 'expense', icon: 'barbell', parentId: null, isDefault: true },
+  { name: 'Medical', type: 'expense', icon: 'medkit', parentId: null, isDefault: true },
+  { name: 'Pharmacy', type: 'expense', icon: 'medical', parentId: null, isDefault: true },
 
   // Education
-  { name: 'Education', type: 'expense', icon: 'school', color: '#F97316', parentId: null, isDefault: true },
-  { name: 'Books', type: 'expense', icon: 'book', color: '#EA580C', parentId: null, isDefault: true },
-  { name: 'Courses', type: 'expense', icon: 'library', color: '#C2410C', parentId: null, isDefault: true },
+  { name: 'Education', type: 'expense', icon: 'school', parentId: null, isDefault: true },
+  { name: 'Books', type: 'expense', icon: 'book', parentId: null, isDefault: true },
+  { name: 'Courses', type: 'expense', icon: 'library', parentId: null, isDefault: true },
 
   // Personal Care
-  { name: 'Personal Care', type: 'expense', icon: 'cut', color: '#A855F7', parentId: null, isDefault: true },
-  { name: 'Haircut', type: 'expense', icon: 'scissors', color: '#9333EA', parentId: null, isDefault: true },
-  { name: 'Spa & Beauty', type: 'expense', icon: 'rose', color: '#7E22CE', parentId: null, isDefault: true },
+  { name: 'Personal Care', type: 'expense', icon: 'cut', parentId: null, isDefault: true },
+  { name: 'Spa & Beauty', type: 'expense', icon: 'rose', parentId: null, isDefault: true },
 
   // Travel
-  { name: 'Travel', type: 'expense', icon: 'airplane', color: '#06B6D4', parentId: null, isDefault: true },
-  { name: 'Hotels', type: 'expense', icon: 'bed', color: '#0891B2', parentId: null, isDefault: true },
-  { name: 'Vacation', type: 'expense', icon: 'boat', color: '#0E7490', parentId: null, isDefault: true },
+  { name: 'Travel', type: 'expense', icon: 'airplane', parentId: null, isDefault: true },
+  { name: 'Hotels', type: 'expense', icon: 'bed', parentId: null, isDefault: true },
+  { name: 'Vacation', type: 'expense', icon: 'boat', parentId: null, isDefault: true },
 
   // Other
-  { name: 'Other Expenses', type: 'expense', icon: 'ellipsis-horizontal-circle', color: '#64748B', parentId: null, isDefault: true },
+  { name: 'Other Expenses', type: 'expense', icon: 'ellipsis-horizontal-circle', parentId: null, isDefault: true },
 ];
 
 /**
@@ -96,9 +95,9 @@ export const seedDefaultCategories = async (): Promise<void> => {
     // Insert default categories
     for (const category of DEFAULT_CATEGORIES) {
       await db.runAsync(
-        `INSERT INTO categories (name, type, icon, color, parent_id, is_default) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [category.name, category.type, category.icon, category.color, category.parentId, category.isDefault ? 1 : 0]
+        `INSERT INTO categories (name, type, icon, parent_id, is_default) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [category.name, category.type, category.icon, category.parentId, category.isDefault ? 1 : 0]
       );
     }
 
@@ -119,13 +118,12 @@ export const createCategory = async (
   
   try {
     const result = await db.runAsync(
-      `INSERT INTO categories (name, type, icon, color, parent_id, is_default) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO categories (name, type, icon, parent_id, is_default) 
+       VALUES (?, ?, ?, ?, ?)`,
       [
         category.name,
         category.type,
         category.icon || null,
-        category.color || null,
         category.parentId || null,
         category.isDefault ? 1 : 0,
       ]
@@ -154,7 +152,6 @@ export const getAllCategories = async (): Promise<Category[]> => {
       name: row.name,
       type: row.type as 'income' | 'expense',
       icon: row.icon,
-      color: row.color,
       parentId: row.parent_id,
       isDefault: row.is_default === 1,
       createdAt: row.created_at,
@@ -214,7 +211,6 @@ export const getCategoryById = async (id: number): Promise<Category | null> => {
       name: row.name,
       type: row.type as 'income' | 'expense',
       icon: row.icon,
-      color: row.color,
       parentId: row.parent_id,
       isDefault: row.is_default === 1,
       createdAt: row.created_at,
@@ -249,10 +245,6 @@ export const updateCategory = async (
     if (category.icon !== undefined) {
       updates.push('icon = ?');
       values.push(category.icon);
-    }
-    if (category.color !== undefined) {
-      updates.push('color = ?');
-      values.push(category.color);
     }
     if (category.parentId !== undefined) {
       updates.push('parent_id = ?');
@@ -346,7 +338,6 @@ export const getSubcategories = async (parentId: number): Promise<Category[]> =>
       name: row.name,
       type: row.type as 'income' | 'expense',
       icon: row.icon,
-      color: row.color,
       parentId: row.parent_id,
       isDefault: row.is_default === 1,
       createdAt: row.created_at,

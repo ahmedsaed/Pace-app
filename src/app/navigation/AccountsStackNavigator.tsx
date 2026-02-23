@@ -6,6 +6,7 @@ import AddAccountScreen from '../screens/AddAccountScreen';
 import EditAccountScreen from '../screens/EditAccountScreen';
 import { Account } from '../../utils/types';
 import { useColors } from '../../hooks/useColors';
+import { fontSize } from '../../styles/theme';
 
 export type AccountsStackParamList = {
   AccountsList: undefined;
@@ -27,6 +28,7 @@ const AccountsStackNavigator = () => {
         headerTintColor: colors.text,
         headerTitleStyle: {
           fontWeight: '600',
+          fontSize: fontSize.xxxl,
         },
         headerShadowVisible: false,
         contentStyle: {

@@ -13,7 +13,8 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { darkColors } from '../../utils/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useColors } from '../../hooks/useColors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../../styles/theme';
 
 interface ModalProps {
@@ -33,6 +34,8 @@ export const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   fullScreen = false,
 }) => {
+  const colors = useColors();
+  
   return (
     <RNModal
       visible={visible}
@@ -46,26 +49,21 @@ export const Modal: React.FC<ModalProps> = ({
       </TouchableWithoutFeedback>
       
       <View style={styles.centeredContainer}>
-        <View style={[styles.modalContainer, fullScreen && styles.modalFullScreen]}>
+        <View style={[styles.modalContainer, { backgroundColor: colors.background, borderColor: colors.border }, fullScreen && styles.modalFullScreen]}>
           {title && (
-            <View style={styles.header}>
-              <Text style={styles.title}>{title}</Text>
+            <View style={[styles.header, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
               {showCloseButton && (
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <Text style={styles.closeText}>✕</Text>
+                  <Ionicons name="close" size={28} color={colors.textSecondary} />
                 </TouchableOpacity>
               )}
             </View>
           )}
           
-          <ScrollView
-            style={styles.content}
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
+          <View style={styles.content}>
             {children}
-          </ScrollView>
+          </View>
         </View>
       </View>
     </RNModal>
@@ -84,11 +82,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   modalContainer: {
-    backgroundColor: darkColors.background,
     borderRadius: borderRadius.xl,
     width: '100%',
     maxWidth: 500,
-    maxHeight: '80%',
+    maxHeight: '85%',
+    height: 600,
+    borderWidth: 1,
   },
   modalFullScreen: {
     maxWidth: '100%',
@@ -102,26 +101,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: darkColors.border,
   },
   title: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold as any,
-    color: darkColors.text,
   },
   closeButton: {
     padding: spacing.xs,
   },
-  closeText: {
-    fontSize: fontSize.xxl,
-    color: darkColors.textSecondary,
-    fontWeight: '300' as any,
-  },
   content: {
-    flexGrow: 1,
-  },
-  contentContainer: {
+    flex: 1,
     padding: spacing.lg,
-    flexGrow: 1,
   },
 });

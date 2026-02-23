@@ -60,7 +60,6 @@ export interface Category {
   name: string;
   type: CategoryType;
   icon: string;
-  color: string;
   parentId: number | null;
   isDefault: boolean;
   createdAt: string;
@@ -70,7 +69,6 @@ export interface CreateCategoryInput {
   name: string;
   type: CategoryType;
   icon?: string;
-  color?: string;
   parentId?: number | null;
   isDefault?: boolean;
 }
@@ -79,7 +77,6 @@ export interface UpdateCategoryInput {
   id: number;
   name?: string;
   icon?: string;
-  color?: string;
   parentId?: number | null;
 }
 
@@ -334,7 +331,6 @@ export interface CategoryStatistics {
   totalAmount: number;
   transactionCount: number;
   percentage: number;
-  color: string;
   icon: string;
 }
 

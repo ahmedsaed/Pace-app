@@ -144,7 +144,6 @@ export const calculateCategoryStatistics = (
         totalAmount: transaction.amount,
         transactionCount: 1,
         percentage: 0,
-        color: transaction.category.color,
         icon: transaction.category.icon,
       });
     }

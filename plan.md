@@ -449,7 +449,8 @@ CREATE TABLE accounts (
 
 ---
 
-### Feature 2: Category Management 🏷️
+### ✅ Feature 2: Category Management 🏷️
+**Status**: Completed
 **Goal**: Users can create and customize income/expense categories
 
 **Database**:
@@ -459,7 +460,6 @@ CREATE TABLE categories (
   name TEXT NOT NULL,
   type TEXT NOT NULL, -- 'income' or 'expense'
   icon TEXT,
-  color TEXT,
   parent_id INTEGER,
   is_default BOOLEAN DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -484,17 +484,17 @@ CREATE TABLE categories (
 - EditCategoryScreen
 
 **Tasks**:
-- [ ] Create categories table
-- [ ] Seed database with default categories on first launch
-- [ ] Create category database queries
-- [ ] Build Zustand store for categories
-- [ ] Build CategoryCard component
-- [ ] Build CategoryForm component
-- [ ] Build CategoryPicker bottom sheet
-- [ ] Implement CategoriesScreen
-- [ ] Implement Add/Edit Category screens
-- [ ] Add navigation for categories flow
-- [ ] Test category CRUD operations with subcategories
+- [x] Create categories table
+- [x] Seed database with default categories on first launch
+- [x] Create category database queries
+- [x] Build Zustand store for categories
+- [x] Build CategoryCard component
+- [x] Build CategoryForm component
+- [x] Build CategoryPicker bottom sheet
+- [x] Implement CategoriesScreen
+- [x] Implement Add/Edit Category screens
+- [x] Add navigation for categories flow
+- [x] Test category CRUD operations with subcategories
 
 ---
 
@@ -576,6 +576,11 @@ CREATE TABLE transactions (
 
 **Pages**:
 - HomeScreen (Records page) - replace DemoHomeScreen
+- CategoryDetailScreen (view transactions for a specific category)
+
+**UI Components for Category Detail**:
+- CompactTransactionRow component (one-line transaction display)
+- MonthSectionHeader component (month as expandable header)
 
 **Tasks**:
 - [ ] Build TransactionList with grouping by date
@@ -589,6 +594,11 @@ CREATE TABLE transactions (
 - [ ] Implement search functionality
 - [ ] Implement filter logic
 - [ ] Test with large datasets
+- [ ] Build CompactTransactionRow component (one-line display for category detail)
+- [ ] Build MonthSectionHeader component
+- [ ] Implement CategoryDetailScreen (list transactions by month)
+- [ ] Update CategoriesScreen to navigate to CategoryDetailScreen instead of EditCategoryScreen
+- [ ] Add swipe action on category cards to directly open edit screen
 
 ---
 
@@ -1059,12 +1069,20 @@ CREATE TABLE settings (
 ## Next Steps
 
 1. ✅ Create initial project plan
-2. ⏳ Finalize data model and relationships
-3. ⏳ Design wireframes/mockups
-4. ⏳ Set up Expo project with TypeScript
-5. ⏳ Implement database layer
-6. ⏳ Build navigation structure
-7. ⏳ Develop core features (Phase 1)
+2. ✅ Set up Expo project with TypeScript
+3. ✅ Implement database layer
+4. ✅ Build navigation structure
+5. ✅ Feature 0: Foundation & Theme
+6. ✅ Feature 1: Account Management
+7. ✅ Feature 2: Category Management
+8. ⏳ Feature 3: Basic Transaction Recording
+9. ⏳ Feature 4: Records Page (Home)
+10. ⏳ Continue with remaining features...
+11. 🔧 **Final Cleanup (Before Production)**: Remove development-only database operations:
+    - Remove `DROP TABLE` statements from `src/db/database.ts` initializeDatabase()
+    - Make default category seeding conditional (only on first app launch)
+    - Implement proper database migration system for schema updates
+    - Enable full data persistence for production builds
 
 ---
 

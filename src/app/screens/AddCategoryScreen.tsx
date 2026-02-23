@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategoryStore } from '../../store/categoryStore';
 import { CategoryForm } from '../../components/category/CategoryForm';
 import { useColors } from '../../hooks/useColors';
@@ -28,12 +29,12 @@ export const AddCategoryScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <CategoryForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
