@@ -1,288 +1,294 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   StatusBar,
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '../../hooks/useColors';
-import { spacing, fontSize, fontWeight, borderRadius, shadows } from '../../styles/theme';
-import { formatCurrency, formatDate } from '../../utils/formatting';
-import { useThemeStore } from '../../store/themeStore';
+import {
+  startOfDay, endOfDay,
+  startOfWeek, endOfWeek,
+  startOfMonth, endOfMonth,
+  format, isToday, isYesterday,
+} from 'date-fns';
 
-const DemoHomeScreen = () => {
-  const currentDate = new Date();
-  const { mode, toggleTheme } = useThemeStore();
-  const colors = useColors();
+import { Transaction } from '../../utils/types';
+import { darkColors } from '../../utils/colors';
+import { spacing, fontSize, fontWeight, borderRadius } from '../../styles/theme';
+import { formatCurrency } from '../../utils/formatting';
+import { TRANSACTION_COLORS, TransactionCard } from '../../components/transaction/TransactionCard';
+
+import { useTransactionStore } from '../../store/transactionStore';
+import { useAccountStore } from '../../store/accountStore';
+import { useCategoryStore } from '../../store/categoryStore';
+import { initializeDatabase } from '../../db/database';
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+type Period = 'today' | 'week' | 'month' | 'all';
+
+interface DateGroup {
+  dateKey: string;
+  label: string;
+  transactions: Transaction[];
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const getPeriodRange = (period: Period): { startDate: string; endDate: string } | null => {
+  const now = new Date();
+  if (period === 'today') return { startDate: startOfDay(now).toISOString(), endDate: endOfDay(now).toISOString() };
+  if (period === 'week') return { startDate: startOfWeek(now, { weekStartsOn: 1 }).toISOString(), endDate: endOfWeek(now, { weekStartsOn: 1 }).toISOString() };
+  if (period === 'month') return { startDate: startOfMonth(now).toISOString(), endDate: endOfMonth(now).toISOString() };
+  return null;
+};
+
+const groupByDate = (transactions: Transaction[]): DateGroup[] => {
+  const map = new Map<string, Transaction[]>();
+  transactions.forEach(t => {
+    const key = format(new Date(t.date), 'yyyy-MM-dd');
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(t);
+  });
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, txns]) => {
+      const date = new Date(key);
+      const label = isToday(date) ? 'Today' : isYesterday(date) ? 'Yesterday' : format(date, 'EEE, MMM d');
+      return { dateKey: key, label, transactions: txns };
+    });
+};
+
+// ── Summary Cards ─────────────────────────────────────────────────────────────
+interface SummaryCardsProps { income: number; expense: number; net: number; currency: string; }
+
+const SummaryCards: React.FC<SummaryCardsProps> = ({ income, expense, net, currency }) => (
+  <View style={summaryStyles.row}>
+    <View style={summaryStyles.card}>
+      <View style={[summaryStyles.dot, { backgroundColor: TRANSACTION_COLORS.income }]} />
+      <Text style={summaryStyles.label}>Income</Text>
+      <Text style={[summaryStyles.value, { color: TRANSACTION_COLORS.income }]}>{formatCurrency(income, currency)}</Text>
+    </View>
+    <View style={[summaryStyles.card, summaryStyles.cardMiddle]}>
+      <View style={[summaryStyles.dot, { backgroundColor: TRANSACTION_COLORS.expense }]} />
+      <Text style={summaryStyles.label}>Expense</Text>
+      <Text style={[summaryStyles.value, { color: TRANSACTION_COLORS.expense }]}>{formatCurrency(expense, currency)}</Text>
+    </View>
+    <View style={summaryStyles.card}>
+      <View style={[summaryStyles.dot, { backgroundColor: net >= 0 ? TRANSACTION_COLORS.income : TRANSACTION_COLORS.expense }]} />
+      <Text style={summaryStyles.label}>Net</Text>
+      <Text style={[summaryStyles.value, { color: net >= 0 ? TRANSACTION_COLORS.income : TRANSACTION_COLORS.expense }]}>
+        {net >= 0 ? '+' : ''}{formatCurrency(net, currency)}
+      </Text>
+    </View>
+  </View>
+);
+
+const summaryStyles = StyleSheet.create({
+  row: { flexDirection: 'row', marginHorizontal: spacing.lg, marginBottom: spacing.md, gap: spacing.sm },
+  card: { flex: 1, backgroundColor: darkColors.surface, borderRadius: borderRadius.lg, padding: spacing.md, borderWidth: 1, borderColor: darkColors.border },
+  cardMiddle: {},
+  dot: { width: 6, height: 6, borderRadius: 3, marginBottom: spacing.xs },
+  label: { fontSize: fontSize.xs, color: darkColors.textSecondary, marginBottom: 4 },
+  value: { fontSize: fontSize.sm, fontWeight: fontWeight.bold as any },
+});
+
+// ── Screen ────────────────────────────────────────────────────────────────────
+const RecordsScreen = ({ navigation }: any) => {
+  const [period, setPeriod] = useState<Period>('month');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { transactions, isLoading, fetchTransactionsByDateRange, fetchTransactions, deleteTransaction } = useTransactionStore();
+  const { accounts, fetchAccounts } = useAccountStore();
+  const { categories, fetchCategories, seedDefaults } = useCategoryStore();
+
+  useEffect(() => { bootstrap(); }, []);
+  useEffect(() => { loadTransactions(); }, [period]);
+
+  const bootstrap = async () => {
+    try {
+      await initializeDatabase();
+      await fetchAccounts();
+      await seedDefaults();
+      await fetchCategories();
+      await loadTransactions();
+    } catch (err) { console.error('RecordsScreen bootstrap error:', err); }
+  };
+
+  const loadTransactions = useCallback(async () => {
+    try {
+      const range = getPeriodRange(period);
+      if (range) await fetchTransactionsByDateRange(range.startDate, range.endDate);
+      else await fetchTransactions();
+    } catch (err) { console.error('Error loading transactions:', err); }
+  }, [period]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await bootstrap();
+    setRefreshing(false);
+  }, [period]);
+
+  const defaultCurrency = accounts[0]?.currency ?? 'USD';
+
+  const { totalIncome, totalExpense } = useMemo(() => {
+    let inc = 0, exp = 0;
+    transactions.forEach(t => { if (t.type === 'income') inc += t.amount; else if (t.type === 'expense') exp += t.amount; });
+    return { totalIncome: inc, totalExpense: exp };
+  }, [transactions]);
+
+  const grouped = useMemo(() => groupByDate(transactions), [transactions]);
+
+  type ListItem =
+    | { kind: 'header'; dateKey: string; label: string; dayTotal: number }
+    | { kind: 'transaction'; transaction: Transaction };
+
+  const flatData: ListItem[] = useMemo(() => {
+    const items: ListItem[] = [];
+    grouped.forEach(group => {
+      const dayTotal = group.transactions.reduce((sum, t) => {
+        if (t.type === 'income') return sum + t.amount;
+        if (t.type === 'expense') return sum - t.amount;
+        return sum;
+      }, 0);
+      items.push({ kind: 'header', dateKey: group.dateKey, label: group.label, dayTotal });
+      group.transactions.forEach(t => items.push({ kind: 'transaction', transaction: t }));
+    });
+    return items;
+  }, [grouped]);
+
+  const handleDelete = async (transaction: Transaction) => {
+    try {
+      await deleteTransaction(transaction.id);
+    } catch { Alert.alert('Error', 'Failed to delete transaction.'); }
+  };
+
+  const renderItem = ({ item }: { item: ListItem }) => {
+    if (item.kind === 'header') {
+      return (
+        <View style={styles.dateHeader}>
+          <Text style={styles.dateHeaderLabel}>{item.label}</Text>
+          <Text style={[styles.dateHeaderTotal, { color: item.dayTotal >= 0 ? TRANSACTION_COLORS.income : TRANSACTION_COLORS.expense }]}>
+            {item.dayTotal >= 0 ? '+' : ''}{formatCurrency(item.dayTotal, defaultCurrency)}
+          </Text>
+        </View>
+      );
+    }
+    const { transaction } = item;
+    const account = accounts.find(a => a.id === transaction.accountId);
+    const category = categories.find(c => c.id === transaction.categoryId);
+    const toAccount = accounts.find(a => a.id === transaction.toAccountId);
+    return (
+      <TransactionCard
+        transaction={transaction}
+        account={account}
+        category={category}
+        toAccount={toAccount}
+        onPress={() => navigation.navigate('TransactionDetail', { transaction })}
+        onLongPress={() =>
+          Alert.alert('Transaction', 'What would you like to do?', [
+            { text: 'Edit', onPress: () => navigation.navigate('EditTransaction', { transaction }) },
+            { text: 'Delete', style: 'destructive', onPress: () => handleDelete(transaction) },
+            { text: 'Cancel', style: 'cancel' },
+          ])
+        }
+      />
+    );
+  };
+
+  const PERIOD_LABELS: { key: Period; label: string }[] = [
+    { key: 'today', label: 'Today' },
+    { key: 'week', label: 'Week' },
+    { key: 'month', label: 'Month' },
+    { key: 'all', label: 'All' },
+  ];
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      <StatusBar 
-        barStyle={mode === 'dark' ? 'light-content' : 'dark-content'} 
-        backgroundColor={colors.background} 
-      />
-      
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={[styles.greeting, { color: colors.text }]}>Hello, Ahmed! 👋</Text>
-            <Text style={[styles.date, { color: colors.textSecondary }]}>{formatDate(currentDate, 'EEEE, MMMM dd')}</Text>
-          </View>
-          <TouchableOpacity onPress={toggleTheme} style={[styles.themeToggle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Ionicons 
-              name={mode === 'dark' ? 'moon' : 'sunny'} 
-              size={22} 
-              color={colors.text} 
-            />
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <StatusBar barStyle="light-content" backgroundColor={darkColors.background} />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Records</Text>
+        <TouchableOpacity style={styles.headerIconBtn} activeOpacity={0.7}>
+          <Ionicons name="search-outline" size={22} color={darkColors.text} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Summary */}
+      <SummaryCards income={totalIncome} expense={totalExpense} net={totalIncome - totalExpense} currency={defaultCurrency} />
+
+      {/* Period filter */}
+      <View style={styles.periodBar}>
+        {PERIOD_LABELS.map(({ key, label }) => (
+          <TouchableOpacity
+            key={key}
+            style={[styles.periodPill, period === key && styles.periodPillActive]}
+            onPress={() => setPeriod(key)}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.periodPillText, period === key && styles.periodPillTextActive]}>{label}</Text>
           </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* List */}
+      {isLoading && transactions.length === 0 ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={darkColors.primary} />
         </View>
-
-        {/* Balance Card */}
-        <View style={[styles.card, styles.balanceCard, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.balanceLabel, { color: colors.textSecondary }]}>Total Balance</Text>
-          <Text style={[styles.balanceAmount, { color: colors.text }]}>{formatCurrency(12547.89, 'USD')}</Text>
-          <View style={styles.balanceStats}>
-            <View style={styles.balanceStatItem}>
-              <Text style={[styles.balanceStatLabel, { color: colors.textSecondary }]}>Income</Text>
-              <Text style={[styles.balanceStatValue, { color: '#10B981' }]}>
-                {formatCurrency(8500, 'USD')}
+      ) : (
+        <FlatList
+          data={flatData}
+          keyExtractor={(item) => item.kind === 'header' ? `h-${item.dateKey}` : `t-${item.transaction.id}`}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={darkColors.primary} />}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="receipt-outline" size={56} color={darkColors.textTertiary} />
+              <Text style={styles.emptyTitle}>No transactions yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Tap the <Text style={{ color: darkColors.primary }}>+</Text> button to record your first transaction.
               </Text>
             </View>
-            <View style={[styles.balanceStatDivider, { backgroundColor: colors.border }]} />
-            <View style={styles.balanceStatItem}>
-              <Text style={[styles.balanceStatLabel, { color: colors.textSecondary }]}>Expenses</Text>
-              <Text style={[styles.balanceStatValue, { color: '#EF4444' }]}>
-                {formatCurrency(3247.50, 'USD')}
-              </Text>
-            </View>
-          </View>
-        </View>
+          }
+        />
+      )}
 
-        {/* Recent Transactions */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Transactions</Text>
-            <TouchableOpacity style={[styles.seeAllButton, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Transaction Items */}
-          <View style={styles.transactionList}>
-            {/* Income Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
-              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
-                <Ionicons name="briefcase" size={20} color="#10B981" />
-              </View>
-              <View style={styles.transactionInfo}>
-                <Text style={[styles.transactionTitle, { color: colors.text }]}>Salary</Text>
-                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Today, 9:00 AM</Text>
-              </View>
-              <Text style={[styles.transactionAmount, { color: '#10B981' }]}>
-                +{formatCurrency(5000, 'USD')}
-              </Text>
-            </View>
-
-            {/* Expense Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
-              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
-                <Ionicons name="restaurant" size={20} color="#EF4444" />
-              </View>
-              <View style={styles.transactionInfo}>
-                <Text style={[styles.transactionTitle, { color: colors.text }]}>Restaurant</Text>
-                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Yesterday, 7:30 PM</Text>
-              </View>
-              <Text style={[styles.transactionAmount, { color: '#EF4444' }]}>
-                -{formatCurrency(45.50, 'USD')}
-              </Text>
-            </View>
-
-            {/* Transfer Transaction */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
-              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
-                <Ionicons name="swap-horizontal" size={20} color={colors.text} />
-              </View>
-              <View style={styles.transactionInfo}>
-                <Text style={[styles.transactionTitle, { color: colors.text }]}>To Savings</Text>
-                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Feb 17, 2:15 PM</Text>
-              </View>
-              <Text style={[styles.transactionAmount, { color: colors.text }]}>
-                {formatCurrency(500, 'USD')}
-              </Text>
-            </View>
-
-            {/* More Expenses */}
-            <View style={[styles.transactionItem, { backgroundColor: colors.surface }]}>
-              <View style={[styles.transactionIcon, { backgroundColor: colors.surfaceHighlight }]}>
-                <Ionicons name="cart" size={20} color="#EF4444" />
-              </View>
-              <View style={styles.transactionInfo}>
-                <Text style={[styles.transactionTitle, { color: colors.text }]}>Groceries</Text>
-                <Text style={[styles.transactionDate, { color: colors.textSecondary }]}>Feb 16, 3:45 PM</Text>
-              </View>
-              <Text style={[styles.transactionAmount, { color: '#EF4444' }]}>
-                -{formatCurrency(127.89, 'USD')}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-      </ScrollView>
-
-      {/* Floating Action Button */}
-      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]}>
-        <Ionicons name="add" size={32} color={colors.background} />
+      {/* FAB */}
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AddTransaction')} activeOpacity={0.85}>
+        <Ionicons name="add" size={28} color={darkColors.background} />
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingBottom: 100,
-  },
-  header: {
-    marginBottom: spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  themeToggle: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  greeting: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    marginBottom: spacing.xs,
-  },
-  date: {
-    fontSize: fontSize.md,
-  },
-  card: {
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  balanceCard: {
-    marginBottom: spacing.lg,
-  },
-  balanceLabel: {
-    fontSize: fontSize.sm,
-    marginBottom: spacing.xs,
-  },
-  balanceAmount: {
-    fontSize: 36,
-    fontWeight: fontWeight.bold,
-    marginBottom: spacing.lg,
-  },
-  balanceStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  balanceStatItem: {
-    flex: 1,
-  },
-  balanceStatLabel: {
-    fontSize: fontSize.xs,
-    marginBottom: spacing.xs,
-  },
-  balanceStatValue: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
-  },
-  balanceStatDivider: {
-    width: 1,
-    height: 32,
-    marginHorizontal: spacing.md,
-  },
-  section: {
-    marginBottom: spacing.lg,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
-    marginBottom: spacing.md,
-  },
-  seeAll: {
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.medium,
-  },
-  seeAllButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-  },
-  transactionList: {
-    gap: spacing.xs,
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-  },
-  transactionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  transactionInfo: {
-    flex: 1,
-  },
-  transactionTitle: {
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.medium,
-    marginBottom: 2,
-  },
-  transactionDate: {
-    fontSize: fontSize.xs,
-  },
-  transactionAmount: {
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.semibold,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    right: spacing.md,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.lg,
-  },
+  safe: { flex: 1, backgroundColor: darkColors.background },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md },
+  headerTitle: { fontSize: fontSize.xxxl, fontWeight: fontWeight.bold as any, color: darkColors.text },
+  headerIconBtn: { width: 40, height: 40, borderRadius: borderRadius.lg, backgroundColor: darkColors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: darkColors.border },
+  periodBar: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, marginBottom: spacing.md },
+  periodPill: { paddingVertical: spacing.xs, paddingHorizontal: spacing.md, borderRadius: borderRadius.full, backgroundColor: darkColors.surface, borderWidth: 1, borderColor: darkColors.border },
+  periodPillActive: { backgroundColor: darkColors.primary, borderColor: darkColors.primary },
+  periodPillText: { fontSize: fontSize.sm, fontWeight: fontWeight.medium as any, color: darkColors.textSecondary },
+  periodPillTextActive: { color: darkColors.background, fontWeight: fontWeight.semibold as any },
+  listContent: { paddingHorizontal: spacing.lg, paddingBottom: 100 },
+  dateHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.sm, marginTop: spacing.sm, marginBottom: spacing.xs },
+  dateHeaderLabel: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold as any, color: darkColors.textSecondary, textTransform: 'uppercase', letterSpacing: 0.5 },
+  dateHeaderTotal: { fontSize: fontSize.sm, fontWeight: fontWeight.semibold as any },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyState: { flex: 1, alignItems: 'center', paddingTop: 80, gap: spacing.sm, paddingHorizontal: spacing.xl },
+  emptyTitle: { fontSize: fontSize.lg, fontWeight: fontWeight.semibold as any, color: darkColors.text, marginTop: spacing.md },
+  emptySubtitle: { fontSize: fontSize.base, color: darkColors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  fab: { position: 'absolute', bottom: spacing.xl, right: spacing.lg, width: 58, height: 58, borderRadius: 29, backgroundColor: darkColors.primary, justifyContent: 'center', alignItems: 'center' },
 });
 
-export default DemoHomeScreen;
+export default RecordsScreen;

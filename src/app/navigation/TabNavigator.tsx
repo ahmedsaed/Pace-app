@@ -3,11 +3,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import RecordsScreen from '../screens/RecordsScreen';
+import RecordsStackNavigator from './RecordsStackNavigator';
 import AccountsStackNavigator from './AccountsStackNavigator';
 import { CategoriesStackNavigator } from './CategoriesStackNavigator';
 import { useColors } from '../../hooks/useColors';
 import { spacing, fontSize } from '../../styles/theme';
+import { useUIStore } from '../../store/uiStore';
 
 export type TabParamList = {
   Records: undefined;
@@ -20,19 +21,20 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const { tabBarVisible } = useUIStore();
   
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.background },
-        tabBarStyle: {
+        tabBarStyle: tabBarVisible ? {
           ...styles.tabBar,
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
-        },
+        } : { display: 'none' },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarLabelStyle: styles.tabBarLabel,
@@ -41,7 +43,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Records"
-        component={RecordsScreen}
+        component={RecordsStackNavigator}
         options={{
           tabBarLabel: 'Records',
           tabBarIcon: ({ focused }) => (

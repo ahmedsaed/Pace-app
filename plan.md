@@ -436,16 +436,16 @@ CREATE TABLE accounts (
 - AccountDetailScreen (view transactions for account)
 
 **Tasks**:
-- [ ] Set up SQLite database with accounts table
-- [ ] Create account database queries (insert, update, delete, select)
-- [ ] Build Zustand store for accounts
-- [ ] Create common UI components (Button, Input, Select, ColorPicker, IconPicker)
-- [ ] Build AccountCard component
-- [ ] Build AccountForm component
-- [ ] Implement AccountsScreen
-- [ ] Implement Add/Edit Account screens
-- [ ] Add navigation for accounts flow
-- [ ] Test account CRUD operations
+- [X] Set up SQLite database with accounts table
+- [X] Create account database queries (insert, update, delete, select)
+- [X] Build Zustand store for accounts
+- [X] Create common UI components (Button, Input, Select, ColorPicker, IconPicker)
+- [X] Build AccountCard component
+- [X] Build AccountForm component
+- [X] Implement AccountsScreen
+- [X] Implement Add/Edit Account screens
+- [X] Add navigation for accounts flow
+- [X] Test account CRUD operations
 
 ---
 
@@ -495,10 +495,12 @@ CREATE TABLE categories (
 - [x] Implement Add/Edit Category screens
 - [x] Add navigation for categories flow
 - [x] Test category CRUD operations with subcategories
+- [ ] Add Category page with list of all transactions of that category
 
 ---
 
-### Feature 3: Basic Transaction Recording 💰
+### ✅ Feature 3: Basic Transaction Recording 💰
+**Status**: Completed
 **Goal**: Users can record income, expense, and transfer transactions
 
 **Database**:
@@ -541,21 +543,21 @@ CREATE TABLE transactions (
 - TransactionDetailScreen
 
 **Tasks**:
-- [ ] Create transactions table
-- [ ] Create transaction database queries
-- [ ] Build Zustand store for transactions
-- [ ] Build TransactionCard component
-- [ ] Build basic TransactionForm
-- [ ] Build AmountInput component
-- [ ] Build DateTimePicker component
-- [ ] Build AccountPicker component
-- [ ] Implement basic AddTransactionScreen
-- [ ] Implement EditTransactionScreen
-- [ ] Implement TransactionDetailScreen
-- [ ] Update account balances when transactions are added/edited/deleted
-- [ ] Add FAB button to home screen
-- [ ] Test transaction CRUD operations
-- [ ] Test balance calculations
+- [x] Create transactions table
+- [x] Create transaction database queries
+- [x] Build Zustand store for transactions
+- [x] Build TransactionCard component
+- [x] Build basic TransactionForm (inline ergonomic layout with custom NumberPad)
+- [x] Build AmountInput component (custom NumberPad with large display)
+- [x] Build DateTimePicker component (date selector in AddTransactionScreen)
+- [x] Build AccountPicker component
+- [x] Implement basic AddTransactionScreen
+- [x] Implement EditTransactionScreen
+- [x] Implement TransactionDetailScreen
+- [x] Update account balances when transactions are added/edited/deleted
+- [x] Add FAB button to home screen
+- [x] Test transaction CRUD operations
+- [x] Test balance calculations
 
 ---
 
@@ -697,29 +699,58 @@ CREATE TABLE budgets (
 
 ---
 
-### Feature 8: Ergonomic Transaction Entry 📱
+### ✅ Feature 8: Ergonomic Transaction Entry 📱
+**Status**: Completed
 **Goal**: Optimized one-handed transaction entry with custom number pad
 
+**Agreed Layout (top → bottom, fixed height, zero scroll):**
+```
+┌──────────────────────────────────────┐
+│ [✕]   [Expense] [Income] [Transfer]  │  header: close + type toggle pills
+├──────────────────────────────────────┤
+│  Note field...               [📎][✨] │  ~22% screen height; future cam/AI btns
+├──────────────────────────────────────┤
+│  1 234.56               USD  [⌫]    │  amount: expression | currency | delete
+├──────────────────────────────────────┤
+│  [+][1][2][3]                        │
+│  [-][4][5][6]                        │  numpad: math ops on left, Save bottom-right
+│  [×][7][8][9]                        │
+│  [÷][.][0][ ✓ ]                      │
+├──────────────────────────────────────┤
+│ [🏷 Category] [💳 Account] [📅 Date]  │  pickers row (→ [From][To][Date] for transfer)
+└──────────────────────────────────────┘
+```
+
+**Save key auto-cycle behavior:**
+- Amount ≤ 0 → shake animation on amount row (no advance)
+- Category missing (expense/income) → auto-opens category picker
+- Account missing → auto-opens account picker
+- Transfer: to-account missing → auto-opens to-account picker
+- All filled → saves and navigates back
+
 **UI Components**:
-- CustomNumberPad component (bottom-positioned)
-- LargeAmountDisplay component
-- QuickCategoryChips component
-- InlineNoteField component (with camera/attachment buttons)
+- `DatePickerModal` — inline bottom-sheet with day/month spinners + Today/Yesterday shortcuts
+- `NumPad` — 4×4 grid (math ops column + digits + Save checkmark key)
+- Note field with placeholder icons for future camera (Feature 9) and AI (Feature 10)
 
 **Pages**:
-- ErgonomicAddTransactionScreen (replaces basic add screen)
+- `AddTransactionScreen` (replaced with ergonomic version)
 
 **Tasks**:
-- [ ] Design ergonomic layout (bottom-up approach)
-- [ ] Build CustomNumberPad component
-- [ ] Build LargeAmountDisplay component
-- [ ] Build QuickCategoryChips (recent categories)
-- [ ] Implement auto-focus chain (amount → category → account)
-- [ ] Add keyboard shortcuts (Enter to next field)
-- [ ] Build bottom-positioned category picker
-- [ ] Build bottom-positioned account picker
-- [ ] Test one-handed usability
-- [ ] Add gesture support for transaction type
+- [x] Design ergonomic layout (bottom-up, fixed height, zero scroll)
+- [x] Build NumPad with math ops column (+ - × ÷) and Save key
+- [x] Amount row: expression display | currency label | ⌫ on right
+- [x] Math expression evaluator (50 + 25 → 75.00 on Save)
+- [x] Note field at top (~22% height) with future cam/AI button placeholders
+- [x] Save key auto-cycles through missing fields (category → account → save)
+- [x] Shake animation on invalid (zero) amount
+- [x] Bottom-positioned category picker (existing CategoryPicker bottom sheet)
+- [x] Bottom-positioned account picker (existing AccountPicker bottom sheet)
+- [x] DatePickerModal with day/month spinners + Today/Yesterday shortcuts
+- [x] Pickers row: compact pills for category, account, date (always visible, no scroll)
+- [x] Transfer mode: pickers row switches to [From Account][To Account][Date]
+- [ ] Add gesture (swipe left/right on amount) to cycle transaction type — deferred
+- [ ] QuickCategoryChips (most-used categories) — deferred to later stage
 
 ---
 
