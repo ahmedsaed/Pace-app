@@ -38,6 +38,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { format, addDays, subDays, isToday, isYesterday } from 'date-fns';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { TransactionType } from '../../utils/types';
@@ -76,9 +77,10 @@ function evalExpr(expr: string): number {
 }
 
 function formatDateLabel(d: Date): string {
-  if (isToday(d)) return 'Today';
-  if (isYesterday(d)) return 'Yesterday';
-  return format(d, 'MMM d');
+  const t = format(d, 'h:mm a');
+  if (isToday(d)) return `Today · ${t}`;
+  if (isYesterday(d)) return `Yesterday · ${t}`;
+  return `${format(d, 'MMM d')} · ${t}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -94,14 +96,42 @@ interface DatePickerModalProps {
 
 const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, date, onConfirm, onClose }) => {
   const [draft, setDraft] = useState(date);
+  const [showNativeDate, setShowNativeDate] = useState(false);
+  const [showNativeTime, setShowNativeTime] = useState(false);
 
   useEffect(() => {
-    if (visible) setDraft(date);
+    if (visible) {
+      setDraft(date);
+      setShowNativeDate(false);
+      setShowNativeTime(false);
+    }
   }, [visible]);
 
   const shiftDay = (n: number) => setDraft(prev => addDays(prev, n));
   const shiftMonth = (n: number) =>
     setDraft(prev => { const d = new Date(prev); d.setMonth(d.getMonth() + n); return d; });
+
+  const onNativeDateChange = (event: DateTimePickerEvent, selected?: Date) => {
+    setShowNativeDate(false);
+    if (event.type !== 'dismissed' && selected) {
+      setDraft(prev => {
+        const d = new Date(selected);
+        d.setHours(prev.getHours(), prev.getMinutes(), 0, 0);
+        return d;
+      });
+    }
+  };
+
+  const onNativeTimeChange = (event: DateTimePickerEvent, selected?: Date) => {
+    setShowNativeTime(false);
+    if (event.type !== 'dismissed' && selected) {
+      setDraft(prev => {
+        const d = new Date(prev);
+        d.setHours(selected.getHours(), selected.getMinutes(), 0, 0);
+        return d;
+      });
+    }
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -110,50 +140,84 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({ visible, date, onConf
       </TouchableWithoutFeedback>
       <View style={dpStyles.sheet}>
         <View style={dpStyles.handle} />
-        <Text style={dpStyles.title}>Select Date</Text>
+        <Text style={dpStyles.title}>Date &amp; Time</Text>
 
         {/* Quick shortcuts */}
         <View style={dpStyles.shortcuts}>
-          <TouchableOpacity style={dpStyles.shortcut} onPress={() => setDraft(new Date())}>
+          <TouchableOpacity style={dpStyles.shortcut} onPress={() => setDraft(prev => { const d = new Date(); d.setHours(prev.getHours(), prev.getMinutes(), 0, 0); return d; })}>
             <Text style={dpStyles.shortcutText}>Today</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={dpStyles.shortcut} onPress={() => setDraft(subDays(new Date(), 1))}>
+          <TouchableOpacity style={dpStyles.shortcut} onPress={() => setDraft(prev => { const d = subDays(new Date(), 1); d.setHours(prev.getHours(), prev.getMinutes(), 0, 0); return d; })}>
             <Text style={dpStyles.shortcutText}>Yesterday</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Day row */}
+        {/* Day row — tap the value to open native calendar */}
         <View style={dpStyles.spinRow}>
           <Text style={dpStyles.spinLabel}>Day</Text>
           <View style={dpStyles.spinner}>
             <TouchableOpacity onPress={() => shiftDay(-1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-back" size={20} color={darkColors.text} />
             </TouchableOpacity>
-            <Text style={dpStyles.spinValue}>{format(draft, 'EEEE, d')}</Text>
+            <TouchableOpacity style={dpStyles.spinValueBtn} onPress={() => setShowNativeDate(true)} activeOpacity={0.6}>
+              <Text style={dpStyles.spinValueTappable}>{format(draft, 'EEE, MMM d')}</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => shiftDay(1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-forward" size={20} color={darkColors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Month row */}
+        {/* Month row — tap the value to open native calendar */}
         <View style={dpStyles.spinRow}>
           <Text style={dpStyles.spinLabel}>Month</Text>
           <View style={dpStyles.spinner}>
             <TouchableOpacity onPress={() => shiftMonth(-1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-back" size={20} color={darkColors.text} />
             </TouchableOpacity>
-            <Text style={dpStyles.spinValue}>{format(draft, 'MMMM yyyy')}</Text>
+            <TouchableOpacity style={dpStyles.spinValueBtn} onPress={() => setShowNativeDate(true)} activeOpacity={0.6}>
+              <Text style={dpStyles.spinValueTappable}>{format(draft, 'MMMM yyyy')}</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => shiftMonth(1)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-forward" size={20} color={darkColors.text} />
             </TouchableOpacity>
           </View>
         </View>
 
+        {/* Time row — tap to open native clock */}
+        <View style={dpStyles.spinRow}>
+          <Text style={dpStyles.spinLabel}>Time</Text>
+          <TouchableOpacity style={[dpStyles.spinner, { justifyContent: 'center' }]} onPress={() => setShowNativeTime(true)} activeOpacity={0.6}>
+            <Text style={dpStyles.timeHour}>{format(draft, 'h')}</Text>
+            <Text style={dpStyles.timeSep}>:</Text>
+            <Text style={dpStyles.timeMinute}>{format(draft, 'mm')}</Text>
+            <Text style={dpStyles.timeAmPm}>{format(draft, 'a')}</Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity style={dpStyles.confirm} onPress={() => { onConfirm(draft); onClose(); }}>
-          <Text style={dpStyles.confirmText}>Set Date</Text>
+          <Text style={dpStyles.confirmText}>Confirm</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Native pickers — render as Android system dialogs */}
+      {showNativeDate && (
+        <DateTimePicker
+          value={draft}
+          mode="date"
+          display="calendar"
+          onChange={onNativeDateChange}
+        />
+      )}
+      {showNativeTime && (
+        <DateTimePicker
+          value={draft}
+          mode="time"
+          is24Hour={false}
+          display="clock"
+          onChange={onNativeTimeChange}
+        />
+      )}
     </Modal>
   );
 };
@@ -195,6 +259,13 @@ const dpStyles = StyleSheet.create({
     height: 46, borderWidth: 1, borderColor: darkColors.border,
   },
   spinValue: { flex: 1, textAlign: 'center', fontSize: fontSize.base, color: darkColors.text, fontWeight: fontWeight.medium as any },
+  spinValueBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  spinValueTappable: { textAlign: 'center', fontSize: fontSize.base, color: darkColors.primary, fontWeight: fontWeight.semibold as any },
+  // ── Time segments inside spinner ──
+  timeHour: { fontSize: fontSize.xl, fontWeight: fontWeight.semibold as any, color: darkColors.primary },
+  timeSep: { marginHorizontal: 2, fontSize: fontSize.xl, fontWeight: fontWeight.bold as any, color: darkColors.textSecondary },
+  timeMinute: { fontSize: fontSize.xl, fontWeight: fontWeight.semibold as any, color: darkColors.primary },
+  timeAmPm: { marginLeft: 6, fontSize: fontSize.xl, fontWeight: fontWeight.medium as any, color: darkColors.textSecondary },
   confirm: {
     marginTop: spacing.md,
     backgroundColor: darkColors.primary,
@@ -285,6 +356,7 @@ export const AddTransactionScreen = ({ navigation }: any) => {
   const [type, setType] = useState<TransactionType>('expense');
   const [expression, setExpression] = useState('0');
   const [date, setDate] = useState(new Date());
+  const [dateCustomized, setDateCustomized] = useState(false);
   const [note, setNote] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [selectedToAccountId, setSelectedToAccountId] = useState<number | null>(null);
@@ -587,8 +659,8 @@ export const AddTransactionScreen = ({ navigation }: any) => {
           activeOpacity={0.7}
         >
           <Ionicons name="calendar-outline" size={20} color={darkColors.textSecondary} />
-          <Text style={[styles.pickerPillText, styles.pickerPillTextFilled]}>
-            {formatDateLabel(date)}
+          <Text style={[styles.pickerPillText, styles.pickerPillTextFilled]} numberOfLines={1}>
+            {dateCustomized ? 'Custom' : 'Today · Now'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -622,7 +694,7 @@ export const AddTransactionScreen = ({ navigation }: any) => {
       <DatePickerModal
         visible={showDatePicker}
         date={date}
-        onConfirm={setDate}
+        onConfirm={d => { setDate(d); setDateCustomized(true); }}
         onClose={() => setShowDatePicker(false)}
       />
     </SafeAreaView>
@@ -764,7 +836,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: spacing.sm + 2,
     backgroundColor: darkColors.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
@@ -772,7 +844,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   pickerPillFilled: { borderColor: darkColors.borderFocus },
-  pickerPillText: { fontSize: fontSize.sm, fontWeight: fontWeight.medium as any, color: darkColors.textSecondary },
+  pickerPillText: { flexShrink: 1, fontSize: fontSize.sm, fontWeight: fontWeight.medium as any, color: darkColors.textSecondary },
   pickerPillTextFilled: { color: darkColors.text },
 });
 

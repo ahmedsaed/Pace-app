@@ -1,6 +1,6 @@
 /**
  * CategoryPicker
- * Bottom-sheet modal for selecting a transaction category
+ * Bottom-sheet modal for selecting a transaction category — 3-column grid
  */
 
 import React, { useMemo, useState } from 'react';
@@ -19,11 +19,16 @@ import { Category, CategoryType } from '../../utils/types';
 import { darkColors } from '../../utils/colors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../../styles/theme';
 
+const TYPE_COLOR: Record<CategoryType, string> = {
+  expense: '#EF4444',
+  income:  '#10B981',
+};
+
 interface CategoryPickerProps {
   visible: boolean;
   categories: Category[];
   selectedId?: number | null;
-  type: CategoryType; // show only matching type
+  type: CategoryType;
   onSelect: (category: Category) => void;
   onClose: () => void;
 }
@@ -37,6 +42,7 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
   onClose,
 }) => {
   const [search, setSearch] = useState('');
+  const typeColor = TYPE_COLOR[type];
 
   const filtered = useMemo(() => {
     const base = categories.filter(c => c.type === type && c.parentId === null);
@@ -54,20 +60,36 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
     const isSelected = item.id === selectedId;
     return (
       <TouchableOpacity
-        style={[styles.row, isSelected && styles.rowSelected]}
+        style={[
+          styles.card,
+          isSelected && { borderColor: typeColor, backgroundColor: typeColor + '18' },
+        ]}
         onPress={() => { onSelect(item); handleClose(); }}
         activeOpacity={0.7}
       >
-        <View style={[styles.iconBubble, { backgroundColor: darkColors.primaryTransparent }]}>
+        <View style={[
+          styles.iconBubble,
+          { backgroundColor: isSelected ? typeColor + '30' : darkColors.background },
+        ]}>
           <Ionicons
             name={(item.icon as any) || 'pricetag'}
-            size={20}
-            color={darkColors.primary}
+            size={26}
+            color={isSelected ? typeColor : darkColors.primary}
           />
         </View>
-        <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+        <Text
+          style={[styles.cardName, isSelected && { color: typeColor }]}
+          numberOfLines={2}
+        >
+          {item.name}
+        </Text>
         {isSelected && (
-          <Ionicons name="checkmark-circle" size={20} color={darkColors.primary} />
+          <Ionicons
+            name="checkmark-circle"
+            size={14}
+            color={typeColor}
+            style={styles.checkmark}
+          />
         )}
       </TouchableOpacity>
     );
@@ -115,7 +137,9 @@ export const CategoryPicker: React.FC<CategoryPickerProps> = ({
           data={filtered}
           keyExtractor={item => String(item.id)}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          numColumns={3}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.gridContent}
           showsVerticalScrollIndicator={false}
           bounces={false}
           ListEmptyComponent={
@@ -180,41 +204,50 @@ const styles = StyleSheet.create({
     color: darkColors.text,
     padding: 0,
   },
-  listContent: {
-    paddingHorizontal: spacing.lg,
+  // ── Grid ──
+  gridContent: {
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.lg,
+    gap: spacing.sm,
+  },
+  row: {
+    gap: spacing.sm,
+  },
+  card: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: darkColors.surfaceHighlight,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: darkColors.border,
+    gap: spacing.xs,
+  },
+  iconBubble: {
+    width: 52,
+    height: 52,
+    borderRadius: borderRadius.xl,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardName: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium as any,
+    color: darkColors.text,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  checkmark: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
   },
   empty: {
     color: darkColors.textSecondary,
     fontSize: fontSize.base,
     textAlign: 'center',
     marginTop: spacing.xl,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.xs,
-    backgroundColor: darkColors.background,
-  },
-  rowSelected: {
-    borderWidth: 1,
-    borderColor: darkColors.primary,
-  },
-  iconBubble: {
-    width: 38,
-    height: 38,
-    borderRadius: borderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  name: {
-    flex: 1,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.medium as any,
-    color: darkColors.text,
+    paddingHorizontal: spacing.lg,
   },
 });
