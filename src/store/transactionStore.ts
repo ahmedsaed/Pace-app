@@ -28,6 +28,7 @@ interface TransactionStore {
   // Actions
   fetchTransactions: () => Promise<void>;
   fetchTransactionsByDateRange: (startDate: string, endDate: string) => Promise<void>;
+  fetchTransactionsByCategory: (categoryId: number) => Promise<Transaction[]>;
   fetchRecentTransactions: (limit?: number) => Promise<void>;
   fetchStats: (startDate?: string, endDate?: string) => Promise<void>;
   createTransaction: (input: CreateTransactionInput) => Promise<number>;
@@ -71,6 +72,17 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Failed to fetch transactions';
       set({ error: msg, isLoading: false });
+    }
+  },
+
+  fetchTransactionsByCategory: async (categoryId) => {
+    try {
+      const transactions = await dbGetByCategory(categoryId);
+      return transactions;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to fetch transactions by category';
+      set({ error: msg });
+      return [];
     }
   },
 
