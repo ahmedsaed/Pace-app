@@ -42,12 +42,12 @@ jobs:
         run: chmod +x android/gradlew
 
       - name: Build Android APK
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
         working-directory: android
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: android/app/build/outputs/apk/release/*.apk
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
