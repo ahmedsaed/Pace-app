@@ -49,6 +49,10 @@ export const CategoriesScreen = ({ navigation }: any) => {
   };
 
   const handleCategoryPress = (category: Category) => {
+    navigation.navigate('CategoryDetail', { categoryId: category.id });
+  };
+
+  const handleCategoryLongPress = (category: Category) => {
     navigation.navigate('EditCategory', { categoryId: category.id });
   };
 
@@ -134,6 +138,7 @@ export const CategoriesScreen = ({ navigation }: any) => {
         <CategoryList
           categories={rootCategories}
           onCategoryPress={handleCategoryPress}
+          onCategoryLongPress={handleCategoryLongPress}
           emptyMessage={`No ${activeTab} categories yet. Tap + to add one.`}
           showSubcategoryCounts={true}
           getSubcategoryCount={getSubcategoryCount}

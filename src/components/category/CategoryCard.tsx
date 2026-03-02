@@ -13,6 +13,7 @@ import { useColors } from '../../hooks/useColors';
 interface CategoryCardProps {
   category: Category;
   onPress?: () => void;
+  onLongPress?: () => void;
   showSubcategories?: boolean;
   subcategoryCount?: number;
 }
@@ -20,6 +21,7 @@ interface CategoryCardProps {
 export const CategoryCard: React.FC<CategoryCardProps> = ({
   category,
   onPress,
+  onLongPress,
   showSubcategories = false,
   subcategoryCount = 0,
 }) => {
@@ -29,6 +31,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     <TouchableOpacity
       style={[styles.container, { backgroundColor: colors.surface }]}
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.7}
     >
       <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>

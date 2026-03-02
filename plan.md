@@ -495,7 +495,7 @@ CREATE TABLE categories (
 - [x] Implement Add/Edit Category screens
 - [x] Add navigation for categories flow
 - [x] Test category CRUD operations with subcategories
-- [ ] Add Category page with list of all transactions of that category
+- [x] Add Category page with list of all transactions of that category
 
 ---
 
@@ -561,7 +561,8 @@ CREATE TABLE transactions (
 
 ---
 
-### Feature 4: Records Page (Home) 🏠
+### ✅ Feature 4: Records Page (Home) 🏠
+**Status**: Completed
 **Goal**: Display transactions with filtering and search
 
 **State Management**:
@@ -585,22 +586,22 @@ CREATE TABLE transactions (
 - MonthSectionHeader component (month as expandable header)
 
 **Tasks**:
-- [ ] Build TransactionList with grouping by date
-- [ ] Build SummaryCards component
-- [ ] Build FilterBar component
-- [ ] Build SearchBar component
-- [ ] Build PeriodSelector component
-- [ ] Implement HomeScreen with real data
-- [ ] Add swipe actions for edit/delete
-- [ ] Add pull to refresh
-- [ ] Implement search functionality
-- [ ] Implement filter logic
+- [x] Build TransactionList with grouping by date
+- [x] Build SummaryCards component
+- [x] Build FilterBar component (period filter)
+- [x] Build SearchBar component (inline search in header)
+- [x] Build PeriodSelector component
+- [x] Implement HomeScreen with real data
+- [x] Add swipe actions for edit/delete (via long-press action sheet)
+- [x] Add pull to refresh
+- [x] Implement search functionality
+- [x] Implement filter logic (period filtering)
 - [ ] Test with large datasets
-- [ ] Build CompactTransactionRow component (one-line display for category detail)
-- [ ] Build MonthSectionHeader component
-- [ ] Implement CategoryDetailScreen (list transactions by month)
-- [ ] Update CategoriesScreen to navigate to CategoryDetailScreen instead of EditCategoryScreen
-- [ ] Add swipe action on category cards to directly open edit screen
+- [x] Build CompactTransactionRow component (one-line display for category detail)
+- [x] Build MonthSectionHeader component
+- [x] Implement CategoryDetailScreen (list transactions by month)
+- [x] Update CategoriesScreen to navigate to CategoryDetailScreen instead of EditCategoryScreen
+- [x] Add swipe action on category cards to directly open edit screen (via long-press)
 
 ---
 

@@ -13,6 +13,7 @@ import { useColors } from '../../hooks/useColors';
 interface CategoryListProps {
   categories: Category[];
   onCategoryPress?: (category: Category) => void;
+  onCategoryLongPress?: (category: Category) => void;
   emptyMessage?: string;
   showSubcategoryCounts?: boolean;
   getSubcategoryCount?: (categoryId: number) => number;
@@ -21,6 +22,7 @@ interface CategoryListProps {
 export const CategoryList: React.FC<CategoryListProps> = ({
   categories,
   onCategoryPress,
+  onCategoryLongPress,
   emptyMessage = 'No categories yet',
   showSubcategoryCounts = false,
   getSubcategoryCount,
@@ -46,6 +48,7 @@ export const CategoryList: React.FC<CategoryListProps> = ({
         <CategoryCard
           category={item}
           onPress={() => onCategoryPress?.(item)}
+          onLongPress={() => onCategoryLongPress?.(item)}
           showSubcategories={showSubcategoryCounts}
           subcategoryCount={getSubcategoryCount?.(item.id!) || 0}
         />

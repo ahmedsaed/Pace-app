@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -102,6 +103,8 @@ const summaryStyles = StyleSheet.create({
 const RecordsScreen = ({ navigation }: any) => {
   const [period, setPeriod] = useState<Period>('month');
   const [refreshing, setRefreshing] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { transactions, isLoading, fetchTransactionsByDateRange, fetchTransactions, deleteTransaction } = useTransactionStore();
   const { accounts, fetchAccounts } = useAccountStore();
@@ -136,13 +139,29 @@ const RecordsScreen = ({ navigation }: any) => {
 
   const defaultCurrency = accounts[0]?.currency ?? 'USD';
 
+  // Filter transactions by search query
+  const filteredTransactions = useMemo(() => {
+    if (!searchQuery.trim()) return transactions;
+    const q = searchQuery.toLowerCase();
+    return transactions.filter(t => {
+      const category = categories.find(c => c.id === t.categoryId);
+      const account = accounts.find(a => a.id === t.accountId);
+      return (
+        (t.note?.toLowerCase().includes(q)) ||
+        (category?.name.toLowerCase().includes(q)) ||
+        (account?.name.toLowerCase().includes(q)) ||
+        String(t.amount).includes(q)
+      );
+    });
+  }, [transactions, searchQuery, categories, accounts]);
+
   const { totalIncome, totalExpense } = useMemo(() => {
     let inc = 0, exp = 0;
-    transactions.forEach(t => { if (t.type === 'income') inc += t.amount; else if (t.type === 'expense') exp += t.amount; });
+    filteredTransactions.forEach(t => { if (t.type === 'income') inc += t.amount; else if (t.type === 'expense') exp += t.amount; });
     return { totalIncome: inc, totalExpense: exp };
-  }, [transactions]);
+  }, [filteredTransactions]);
 
-  const grouped = useMemo(() => groupByDate(transactions), [transactions]);
+  const grouped = useMemo(() => groupByDate(filteredTransactions), [filteredTransactions]);
 
   type ListItem =
     | { kind: 'header'; dateKey: string; label: string; dayTotal: number }
@@ -163,9 +182,22 @@ const RecordsScreen = ({ navigation }: any) => {
   }, [grouped]);
 
   const handleDelete = async (transaction: Transaction) => {
-    try {
-      await deleteTransaction(transaction.id);
-    } catch { Alert.alert('Error', 'Failed to delete transaction.'); }
+    Alert.alert(
+      'Delete Transaction',
+      'Are you sure you want to delete this transaction?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTransaction(transaction.id);
+            } catch { Alert.alert('Error', 'Failed to delete transaction.'); }
+          },
+        },
+      ],
+    );
   };
 
   const renderItem = ({ item }: { item: ListItem }) => {
@@ -214,28 +246,57 @@ const RecordsScreen = ({ navigation }: any) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Records</Text>
-        <TouchableOpacity style={styles.headerIconBtn} activeOpacity={0.7}>
-          <Ionicons name="search-outline" size={22} color={darkColors.text} />
-        </TouchableOpacity>
+        {searchVisible ? (
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={18} color={darkColors.textSecondary} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search transactions…"
+              placeholderTextColor={darkColors.textTertiary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+              returnKeyType="search"
+            />
+            <TouchableOpacity
+              onPress={() => { setSearchVisible(false); setSearchQuery(''); }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name="close-circle" size={18} color={darkColors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.headerTitle}>Records</Text>
+            <TouchableOpacity
+              style={styles.headerIconBtn}
+              activeOpacity={0.7}
+              onPress={() => setSearchVisible(true)}
+            >
+              <Ionicons name="search-outline" size={22} color={darkColors.text} />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Summary */}
       <SummaryCards income={totalIncome} expense={totalExpense} net={totalIncome - totalExpense} currency={defaultCurrency} />
 
-      {/* Period filter */}
-      <View style={styles.periodBar}>
-        {PERIOD_LABELS.map(({ key, label }) => (
-          <TouchableOpacity
-            key={key}
-            style={[styles.periodPill, period === key && styles.periodPillActive]}
-            onPress={() => setPeriod(key)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.periodPillText, period === key && styles.periodPillTextActive]}>{label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Period filter — hidden while searching */}
+      {!searchVisible && (
+        <View style={styles.periodBar}>
+          {PERIOD_LABELS.map(({ key, label }) => (
+            <TouchableOpacity
+              key={key}
+              style={[styles.periodPill, period === key && styles.periodPillActive]}
+              onPress={() => setPeriod(key)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.periodPillText, period === key && styles.periodPillTextActive]}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* List */}
       {isLoading && transactions.length === 0 ? (
@@ -253,9 +314,13 @@ const RecordsScreen = ({ navigation }: any) => {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Ionicons name="receipt-outline" size={56} color={darkColors.textTertiary} />
-              <Text style={styles.emptyTitle}>No transactions yet</Text>
+              <Text style={styles.emptyTitle}>
+                {searchQuery ? 'No results found' : 'No transactions yet'}
+              </Text>
               <Text style={styles.emptySubtitle}>
-                Tap the <Text style={{ color: darkColors.primary }}>+</Text> button to record your first transaction.
+                {searchQuery
+                  ? `No transactions match "${searchQuery}".`
+                  : `Tap the + button to record your first transaction.`}
               </Text>
             </View>
           }
@@ -275,6 +340,9 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.md },
   headerTitle: { fontSize: fontSize.xxxl, fontWeight: fontWeight.bold as any, color: darkColors.text },
   headerIconBtn: { width: 40, height: 40, borderRadius: borderRadius.lg, backgroundColor: darkColors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: darkColors.border },
+  searchBar: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: darkColors.surface, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: darkColors.border, paddingHorizontal: spacing.sm, height: 40 },
+  searchIcon: { marginRight: spacing.xs },
+  searchInput: { flex: 1, fontSize: fontSize.base, color: darkColors.text },
   periodBar: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, marginBottom: spacing.md },
   periodPill: { paddingVertical: spacing.xs, paddingHorizontal: spacing.md, borderRadius: borderRadius.full, backgroundColor: darkColors.surface, borderWidth: 1, borderColor: darkColors.border },
   periodPillActive: { backgroundColor: darkColors.primary, borderColor: darkColors.primary },
