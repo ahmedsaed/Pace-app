@@ -41,5 +41,8 @@
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "react-native-reanimated": "~3.17.4"
+  }
 }
