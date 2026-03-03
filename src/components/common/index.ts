@@ -4,3 +4,4 @@ export { Input } from './Input';
 export { Modal } from './Modal';
 export { ColorPicker } from './ColorPicker';
 export { IconPicker } from './IconPicker';
+export { IconPickerSheet } from './IconPickerSheet';

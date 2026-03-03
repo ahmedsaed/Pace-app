@@ -10,8 +10,7 @@ import { Category } from '../../utils/types';
 import { spacing, fontSize, fontWeight } from '../../styles/theme';
 import { Input } from '../common/Input';
 import { Button } from '../common/Button';
-import { IconPicker } from '../common/IconPicker';
-import { Modal } from '../common/Modal';
+import { IconPickerSheet, CATEGORY_ICONS } from '../common/IconPickerSheet';
 import { useColors } from '../../hooks/useColors';
 
 interface CategoryFormProps {
@@ -156,20 +155,18 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
         )}
       </View>
 
-      {/* Icon Picker Modal */}
-      <Modal
+      {/* Icon Picker Sheet */}
+      <IconPickerSheet
         visible={showIconPicker}
+        selectedIcon={icon}
+        onSelect={(selectedIcon: string) => {
+          setIcon(selectedIcon);
+          setShowIconPicker(false);
+        }}
         onClose={() => setShowIconPicker(false)}
-        title="Choose Icon"
-      >
-        <IconPicker
-          selectedIcon={icon}
-          onIconSelect={(selectedIcon: string) => {
-            setIcon(selectedIcon);
-            setShowIconPicker(false);
-          }}
-        />
-      </Modal>
+        title="Category Icon"
+        icons={CATEGORY_ICONS}
+      />
     </ScrollView>
   );
 };

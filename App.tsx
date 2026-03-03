@@ -3,9 +3,14 @@ import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useFonts } from 'expo-font';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import TabNavigator from './src/app/navigation/TabNavigator';
 
 export default function App() {
+  const [fontsLoaded] = useFonts(Ionicons.font);
+  if (!fontsLoaded) return null;
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>

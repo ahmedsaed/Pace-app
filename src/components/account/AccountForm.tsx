@@ -4,16 +4,16 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Account, AccountType } from '../../utils/types';
 import { darkColors } from '../../utils/colors';
 import { spacing, fontSize, fontWeight } from '../../styles/theme';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { CustomSwitch } from '../common/CustomSwitch';
-import { IconPicker } from '../common/IconPicker';
+import { IconPickerSheet, ACCOUNT_ICONS } from '../common/IconPickerSheet';
 import { ACCOUNT_TYPES, DEFAULT_CURRENCY } from '../../utils/constants';
-import { TouchableOpacity } from 'react-native';
 
 interface AccountFormProps {
   account?: Account;
@@ -40,6 +40,7 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   const [includeInTotal, setIncludeInTotal] = useState(account?.includeInTotal !== false);
   const [color, setColor] = useState(account?.color || '#3B82F6');
   const [icon, setIcon] = useState(account?.icon || 'bank');
+  const [showIconPicker, setShowIconPicker] = useState(false);
   
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -89,7 +90,8 @@ export const AccountForm: React.FC<AccountFormProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Input
         label="Account Name *"
         value={name}
@@ -143,11 +145,17 @@ export const AccountForm: React.FC<AccountFormProps> = ({
         />
       )}
 
-      <IconPicker
-        label="Icon"
-        selectedIcon={icon}
-        onIconSelect={setIcon}
-      />
+      <View style={styles.section}>
+        <Text style={styles.label}>Icon</Text>
+        <TouchableOpacity
+          style={[styles.iconButton, { backgroundColor: darkColors.surface, borderColor: darkColors.border, borderWidth: 1 }]}
+          onPress={() => setShowIconPicker(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name={icon as any} size={32} color={darkColors.primary} />
+          <Text style={[styles.iconButtonText, { color: darkColors.text }]}>Tap to change icon</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.switchContainer}>
         <View style={styles.switchLabel}>
@@ -177,6 +185,16 @@ export const AccountForm: React.FC<AccountFormProps> = ({
         />
       </View>
     </ScrollView>
+
+    <IconPickerSheet
+      visible={showIconPicker}
+      selectedIcon={icon}
+      onSelect={setIcon}
+      onClose={() => setShowIconPicker(false)}
+      title="Account Icon"
+      icons={ACCOUNT_ICONS}
+    />
+  </>
   );
 };
 
@@ -245,5 +263,16 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     flex: 2,
+  },
+  iconButton: {
+    padding: spacing.lg,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: spacing.sm,
+  },
+  iconButtonText: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium as any,
   },
 });
